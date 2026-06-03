@@ -11,6 +11,7 @@ from docx import Document
 import tempfile
 import hashlib
 from dotenv import load_dotenv
+import re
 
 # ========== TAMBAHAN V4.5.1: LOGGING & UTILITIES ==========
 import logging
@@ -615,55 +616,106 @@ Jawab JSON saja: {{"importance": angka, "reason": "alasan singkat"}}"""
         return 5  # Default
 
 def deteksi_duplikat_semantik():
-    """Gunakan AI untuk mendeteksi fakta yang kemungkinan duplikat."""
+    """Gunakan AI untuk mendeteksi fakta yang kemungkinan duplikat.
+
+    Mengembalikan list pasangan {"id1":..., "id2":..., "reason":..., "suggestion":...}.
+    Fungsi ini menangani respons AI yang tidak valid dengan beberapa fallback parsing.
+    """
     fakta = lihat_semua_fakta()
-    
     if len(fakta) < 2:
         return []
-    
-    # Ambil semua konten
-    fakta_list = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
-    
-    prompt = f"""Analisis daftar fakta berikut. Temukan pasangan fakta yang kemungkinan adalah TOPIK YANG SAMA (duplikat atau sangat mirip).
 
+    # Bangun prompt dengan bullet list yang ringkas
+    fakta_list = "\n".join([f"- [#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
+
+    prompt = f"""Analisis daftar fakta berikut dan kembalikan PAIR fakta yang kemungkinan duplikat
+atau topik sama. Jawab berupa JSON array seperti:
+[{{"id1": 1, "id2": 2, "reason": "alasan", "suggestion": "saran merge"}}, ...]
+
+Hanya tampilkan pasangan yang memang sangat mirip. Jika tidak ada, jawab [].
+
+Fakta:
 {fakta_list}
-
-Jawab JSON array:
-[{{"id1": id_fakta_pertama, "id2": id_fakta_kedua, "reason": "alasan kenapa mirip", "suggestion": "saran merge"}}]
-
-HANYA tampilkan pasangan yang benar-benar mirip. Jika tidak ada, jawab []."""
+"""
 
     try:
         response = ollama.chat(model=MODEL, messages=[
             {"role": "system", "content": "Jawab HANYA JSON array."},
             {"role": "user", "content": prompt}
         ])
-        hasil = response["message"]["content"].strip()
-        if hasil.startswith("```"):
-            hasil = hasil.split("\n", 1)[1].rstrip("```")
-        return json.loads(hasil)
+        raw = response["message"]["content"].strip()
+
+        # Hapus code fences jika ada
+        if raw.startswith("```"):
+            try:
+                raw = raw.split("\n", 1)[1].rstrip("```")
+            except Exception:
+                raw = raw.strip('`')
+
+        # Try direct JSON parse
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return parsed
+        except Exception:
+            pass
+
+        # Fallback: try to extract first JSON array substring
+        m = re.search(r"(\[.*\])", raw, re.S)
+        if m:
+            try:
+                parsed = json.loads(m.group(1))
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                logger.debug("deteksi_duplikat_semantik: failed to parse extracted JSON array", exc_info=True)
+
+        # Last resort: attempt to extract simple pairs with regex
+        pairs = []
+        for match in re.finditer(r"#(\d+).*?#(\d+)", raw):
+            try:
+                id1 = int(match.group(1))
+                id2 = int(match.group(2))
+                pairs.append({"id1": id1, "id2": id2, "reason": "auto-detected", "suggestion": "Merge jika sama"})
+            except Exception:
+                continue
+
+        if pairs:
+            return pairs
+
+        logger.info("deteksi_duplikat_semantik: no duplicates found or unable to parse AI response")
+        return []
     except Exception as e:
         logger.error(f"deteksi_duplikat_semantik failed: {type(e).__name__}: {str(e)}", exc_info=True)
         return []
 
 def merge_fakta_dengan_ai(fakta_list):
-    """Merge beberapa fakta menjadi satu dengan AI."""
-    konten = "\n".join([f"[{f[1]}] {f[2]}" for f in fakta_list])
-    prompt = f"""Gabung fakta-fakta berikut menjadi satu deskripsi yang komprehensif:
+    """Gabungkan beberapa fakta dengan AI."""
+    if not fakta_list:
+        return "Tidak ada fakta untuk digabung."
 
-{konten}
+    fakta_text = "\n".join([f"- {f[2]}" for f in fakta_list])
+    logger.info(f"Merging {len(fakta_list)} facts: {[f[0] for f in fakta_list]}")
 
-Jawab dengan teks gabungan saja, tanpa JSON."""
+    prompt = f"""Gabungkan fakta-fakta berikut menjadi satu fakta yang padat dan koheren.
+Jangan ada informasi yang hilang. Hilangkan pengulangan.
+Output hanya fakta gabungannya saja, tanpa penjelasan.
+
+{fakta_text}
+
+Hasil gabungan:"""
     
     try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Gabung dan ringkas informasi dengan baik."},
-            {"role": "user", "content": prompt}
-        ])
-        return response["message"]["content"].strip()
+        response = ollama.chat(
+            model=MODEL,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        hasil = response["message"]["content"].strip()
+        logger.info(f"Merge result: {hasil[:100]}...")
+        return hasil
     except Exception as e:
-        logger.error(f"merge_fakta_dengan_ai failed: {type(e).__name__}: {str(e)}", exc_info=True)
-        return konten
+        logger.error(f"Merge failed: {type(e).__name__}: {str(e)}", exc_info=True)
+        return f"[Gagal menggabungkan: {type(e).__name__}]"
 
 # ========== FUNGSI AI ==========
 def ringkas_teks(teks):
@@ -780,34 +832,70 @@ if st.session_state.authenticated:
     elif menu == "📝 Ringkasan":
         st.title("📝 Ringkasan Teks")
         
-        tab1, tab2 = st.tabs(["Teks Langsung", "Upload File"])
+        tab1, tab2 = st.tabs(["✏️ Paste Teks", "📤 Upload File"])
         
         with tab1:
-            teks = st.text_area("Masukkan teks yang ingin diringkas:", height=200)
-            if st.button("Ringkas Teks", key="ringkas_teks"):
-                if teks.strip():
-                    with st.spinner("Meringkas..."):
-                        hasil = ringkas_teks(teks)
-                        st.markdown(hasil)
-                        
-                        # Simpan
-                        os.makedirs(SAVE_FOLDER, exist_ok=True)
-                        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                        filepath = f"{SAVE_FOLDER}/ringkasan_{timestamp}.txt"
-                        with open(filepath, "w", encoding="utf-8") as f:
-                            f.write(f"{hasil}\n\n=== TEKS ASLI ===\n{teks[:500]}...")
-                        st.success(f"Disimpan: {filepath}")
+            st.caption("Paste teks panjang di sini. Tidak ada batasan panjang.")
+            
+            # Gunakan text_area dengan height besar
+            teks = st.text_area(
+                "Masukkan teks yang ingin diringkas:",
+                height=350,
+                placeholder="Paste teks Anda di sini...",
+                key="ringkasan_text"
+            )
+            
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                ringkas_btn = st.button("🔍 Ringkas Teks", type="primary", use_container_width=True)
+            
+            if ringkas_btn:
+                if not teks or not teks.strip():
+                    st.error("⚠️ Teks tidak boleh kosong.")
+                else:
+                    with st.spinner(f"⏳ {NAMA_AI} sedang meringkas... ({len(teks)} karakter)"):
+                        try:
+                            hasil = ringkas_teks(teks)
+                            st.success("✅ Ringkasan berhasil!")
+                            st.markdown("### 📋 Hasil Ringkasan")
+                            st.markdown(hasil)
+                            
+                            # Info
+                            with st.expander("📊 Info Ringkasan"):
+                                st.write(f"- **Panjang teks asli:** {len(teks)} karakter")
+                                st.write(f"- **Panjang ringkasan:** {len(hasil)} karakter")
+                                st.write(f"- **Rasio:** {len(hasil)/max(len(teks),1)*100:.1f}%")
+                            
+                            # Simpan otomatis
+                            os.makedirs(SAVE_FOLDER, exist_ok=True)
+                            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                            filepath = f"{SAVE_FOLDER}/ringkasan_{timestamp}.txt"
+                            with open(filepath, "w", encoding="utf-8") as f:
+                                f.write(f"=== RINGKASAN ===\n{hasil}\n\n=== TEKS ASLI ===\n{teks[:1000]}...")
+                            st.success(f"💾 Tersimpan: `{filepath}`")
+                            
+                            logger.info(f"Summarized text: {len(teks)} -> {len(hasil)} chars")
+                            
+                        except Exception as e:
+                            logger.error(f"Summarization failed: {str(e)}", exc_info=True)
+                            st.error(f"❌ Gagal meringkas: {type(e).__name__}")
+            
+            # Tampilkan info panjang teks
+            if teks:
+                st.caption(f"📊 {len(teks)} karakter | ~{len(teks.split())} kata")
         
         with tab2:
-            uploaded = st.file_uploader("Upload file (PDF, DOCX, TXT, MD)", type=["pdf", "docx", "txt", "md"])
-            if uploaded and st.button("Upload & Ringkas"):
-                with st.spinner("Memproses..."):
+            st.caption("Upload file untuk diringkas otomatis.")
+            uploaded = st.file_uploader("Pilih file", type=["pdf", "docx", "txt", "md"], key="ringkasan_upload")
+            if uploaded and st.button("📤 Upload & Ringkas", key="ringkasan_upload_btn"):
+                with st.spinner("⏳ Memproses file..."):
                     doc_id, ringkasan = proses_upload(uploaded)
                     if doc_id:
-                        st.success(f"Upload berhasil! ID: #{doc_id}")
+                        st.success(f"✅ Upload berhasil! ID Dokumen: #{doc_id}")
+                        st.markdown("### 📋 Ringkasan Otomatis")
                         st.markdown(ringkasan)
                     else:
-                        st.error(ringkasan)
+                        st.error(f"❌ Gagal: {ringkasan}")
     
     # ===== MEMORY =====
     elif menu == "📚 Memory":
@@ -822,6 +910,35 @@ if st.session_state.authenticated:
             st.metric("Manual 👤", sum(1 for f in fakta if f[3] == "manual"))
         with col3:
             st.metric("Auto 🤖", sum(1 for f in fakta if f[3] == "auto"))
+        
+        st.divider()
+        
+        # === CATAT FAKTA BARU ===
+        st.subheader("✍️ Catat Fakta Baru")
+        with st.form("form_catat_fakta", clear_on_submit=True):
+            kategori = st.selectbox("Kategori", ["proyek", "preferensi", "kontak", "jadwal", "akun", "skill", "pekerjaan", "pendidikan", "umum"])
+            fakta_text = st.text_area("Fakta:", placeholder="Ketik fakta yang ingin dicatat...", height=100)
+            submitted = st.form_submit_button("📝 Catat Fakta", use_container_width=True)
+            
+            if submitted:
+                if not fakta_text or not fakta_text.strip():
+                    st.error("⚠️ Fakta tidak boleh kosong.")
+                else:
+                    with st.spinner(f"⏳ {NAMA_AI} menilai importance..."):
+                        try:
+                            # Hitung importance otomatis
+                            importance = auto_rate_importance(fakta_text, kategori)
+                            # Simpan
+                            success, error = simpan_fakta(kategori, fakta_text, "manual", 1.0, importance)
+                            if success:
+                                st.success(f"✅ Fakta berhasil dicatat! (Importance: {importance}/10)")
+                                logger.info(f"Manual fact recorded: [{kategori}] {fakta_text[:50]}... (imp={importance})")
+                            else:
+                                st.error(f"❌ Gagal mencatat: {error}")
+                                logger.error(f"Failed to record manual fact: {error}")
+                        except Exception as e:
+                            logger.error(f"Error recording manual fact: {type(e).__name__}: {str(e)}", exc_info=True)
+                            st.error(f"❌ Error: {type(e).__name__}")
         
         st.divider()
         
@@ -974,16 +1091,36 @@ if st.session_state.authenticated:
         # === PERINGATAN ===
         st.subheader("⚠️ Peringatan")
         
-        # Fakta tidak pernah diakses > 30 hari
-        old_unused = [f for f in fakta if f[7] is None or (datetime.datetime.now() - datetime.datetime.strptime(f[7], "%Y-%m-%d %H:%M:%S")).days > 30]
-        if old_unused:
-            with st.expander(f"💤 {len(old_unused)} fakta tidak pernah diakses > 30 hari"):
-                for f in old_unused:
+        # 1. Fakta yang BELUM PERNAH diakses (baru)
+        never_accessed = [f for f in fakta if f[7] is None]
+        if never_accessed:
+            with st.expander(f"🆕 {len(never_accessed)} fakta baru (belum pernah diakses)"):
+                st.caption("Fakta-fakta ini baru dibuat dan belum pernah digunakan dalam percakapan.")
+                for f in never_accessed[:10]:
                     st.write(f"- [#{f[0]}] {f[2][:100]}")
         
-        # Fakta low importance banyak
-        if low_importance > len(fakta) * 0.3:
-            st.warning(f"⚠️ {low_importance} fakta memiliki importance rendah. Pertimbangkan untuk membersihkan.")
+        # 2. Fakta yang SUDAH LAMA tidak diakses (> 30 hari)
+        now = datetime.datetime.now()
+        old_unused = []
+        for f in fakta:
+            if f[7] is not None:
+                try:
+                    last_access = datetime.datetime.strptime(f[7], "%Y-%m-%d %H:%M:%S")
+                    days_since = (now - last_access).days
+                    if days_since > DAYS_UNUSED_WARNING:
+                        old_unused.append((f, days_since))
+                except Exception:
+                    pass
+        
+        if old_unused:
+            with st.expander(f"💤 {len(old_unused)} fakta tidak diakses > {DAYS_UNUSED_WARNING} hari"):
+                for f, days in old_unused[:10]:
+                    st.write(f"- [#{f[0]}] {f[2][:100]} ({days} hari)")
+        
+        # 3. Fakta dengan importance rendah
+        low_importance = [f for f in fakta if f[5] <= 3]
+        if len(low_importance) > len(fakta) * 0.3 and len(fakta) > 5:
+            st.warning(f"⚠️ {len(low_importance)} fakta memiliki importance rendah (≤3). Pertimbangkan untuk membersihkan.")
         
         st.divider()
         
@@ -1122,7 +1259,14 @@ if st.session_state.authenticated:
                     if existing:
                         skipped += 1
                     else:
-                        success, error = simpan_fakta(category, content, item.get("source", "imported"), item.get("confidence", 1.0))
+                        # Rate importance automatically for imported items
+                        try:
+                            importance = auto_rate_importance(content, category)
+                        except Exception as e:
+                            logger.error(f"Failed to auto-rate importance for import: {str(e)}", exc_info=True)
+                            importance = 5
+
+                        success, error = simpan_fakta(category, content, item.get("source", "imported"), item.get("confidence", 1.0), importance)
                         if not success:
                             skipped += 1
                             logger.warning(f"Imported fact skipped (save failed): {error}")
