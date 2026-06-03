@@ -38,33 +38,38 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "saki2024")
 
 # Setup logging
 def setup_logging():
-    """Setup logging configuration - panggil sekali saat startup"""
+    """Setup logging configuration - hanya dipanggil sekali"""
+    logger = logging.getLogger("saki")
+    
+    # Cegah duplikat handler
+    if logger.handlers:
+        return logger
+    
+    logger.setLevel(logging.DEBUG)
+    
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
     
-    logger = logging.getLogger("saki")
-    logger.setLevel(logging.DEBUG)
-    
-    # Console handler (INFO ke atas)
+    # Console handler
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(console_format)
     
-    # File handler (DEBUG ke atas, rotating)
+    # File handler (DEBUG, rotating)
     file_handler = logging.handlers.RotatingFileHandler(
         log_dir / "saki.log",
-        maxBytes=10 * 1024 * 1024,  # 10MB
+        maxBytes=10 * 1024 * 1024,
         backupCount=5
     )
     file_handler.setLevel(logging.DEBUG)
     file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s')
     file_handler.setFormatter(file_format)
     
-    # Error file handler (ERROR saja)
+    # Error file handler
     error_handler = logging.handlers.RotatingFileHandler(
         log_dir / "saki_errors.log",
-        maxBytes=5 * 1024 * 1024,  # 5MB
+        maxBytes=5 * 1024 * 1024,
         backupCount=3
     )
     error_handler.setLevel(logging.ERROR)
@@ -73,6 +78,9 @@ def setup_logging():
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
     logger.addHandler(error_handler)
+    
+    # Jangan propagate ke root logger (hindari duplikat dari Streamlit)
+    logger.propagate = False
     
     return logger
 

@@ -14970,3 +14970,892 @@ json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 2026-06-03 20:29:32,598 - saki - INFO - <module>:81 - Logging system initialized
 2026-06-03 20:37:32,831 - saki - INFO - <module>:81 - Logging system initialized
 2026-06-03 20:37:32,831 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:58,102 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:58,102 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:58,102 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,376 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,376 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,376 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,376 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,412 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,412 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,412 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,412 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,412 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:32:59,433 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:32:59,433 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:32:59,433 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:32:59,433 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:32:59,433 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:32:59,435 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:32:59,435 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:32:59,435 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:32:59,435 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:32:59,435 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:32:59,438 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:32:59,438 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:32:59,438 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:32:59,438 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:32:59,438 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:32:59,441 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:32:59,441 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:32:59,441 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:32:59,441 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:32:59,441 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:32:59,444 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:32:59,444 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:32:59,444 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:32:59,444 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:32:59,444 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:32:59,446 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:32:59,446 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:32:59,446 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:32:59,446 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:32:59,446 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:01,267 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:01,267 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:01,267 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:01,267 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:01,267 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:01,267 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:01,275 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:01,275 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:01,275 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:01,275 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:01,275 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:01,275 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:01,275 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:01,275 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:01,275 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:01,275 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:01,275 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:01,275 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:01,282 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:01,282 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:01,282 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:01,282 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:01,282 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:01,282 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:01,285 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:01,285 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:01,285 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:01,285 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:01,285 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:01,285 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:01,288 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:01,288 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:01,288 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:01,288 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:01,288 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:01,288 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:01,292 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:01,292 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:01,292 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:01,292 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:01,292 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:01,292 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,217 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,226 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,234 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,238 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,241 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:02,245 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,515 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,524 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,528 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,532 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,536 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,540 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:03,545 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,181 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,191 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,196 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,201 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,206 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,215 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:17,220 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,396 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,404 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,411 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,417 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,422 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,427 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:19,433 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,195 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,205 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,212 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,224 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:24,230 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,661 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,671 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,685 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,692 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,699 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:27,700 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,076 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,088 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,095 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,102 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,109 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,111 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:29,120 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,356 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,365 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,373 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,383 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,390 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:30,400 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,405 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,416 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,423 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,433 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,440 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,448 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:33:31,457 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,024 - saki - INFO - <module>:81 - Logging system initialized
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,038 - saki - INFO - <module>:792 - ==================================================
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,047 - saki - INFO - <module>:793 - Saki v4.5.1 starting...
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,056 - saki - INFO - <module>:794 - Model: qwen3:4b
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,063 - saki - INFO - <module>:795 - Database: saki_memory.db
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,072 - saki - INFO - <module>:796 - Documents: documents
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
