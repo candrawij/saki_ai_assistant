@@ -1083,7 +1083,7 @@ if st.session_state.authenticated:
                 simpan_chat(NAMA_AI.upper(), jawaban)
                 
                 # Auto-ekstrak
-                hasil = auto_ekstrak_fakta(prompt)
+                hasil = auto_ekstrak_fakta(prompt, st.session_state.chat_history)
                 if hasil:
                     existing = cek_fakta_duplikat(hasil["fact"])
                     if not existing:
