@@ -664,32 +664,74 @@ def proses_upload(uploaded_file) -> Tuple[Optional[int], str]:
                 logger.warning(f"Failed to cleanup temp file {tmp_path}: {str(e)}")
 
 # ========== AUTO-EXTRACTION ==========
-def auto_ekstrak_fakta(pesan_user):
+def auto_ekstrak_fakta(pesan_user, riwayat_chat=None):
+    """
+    Menganalisis pesan user untuk mendeteksi fakta penting.
+    HANYA mengekstrak fakta yang BERSIFAT PERMANEN — bukan obrolan sesaat.
+    """
     if len(pesan_user.split()) < 3:
         return None
     
-    prompt = f"""Analisis pesan berikut. Apakah mengandung FAKTA PENTING tentang user yang layak dicatat?
-Fakta penting: proyek, preferensi, kontak, deadline, skill, pekerjaan, pendidikan.
-BUKAN fakta: pertanyaan umum, obrolan ringan, opini.
+    # Ambil 3 pesan terakhir untuk konteks
+    konteks = ""
+    if riwayat_chat and len(riwayat_chat) >= 2:
+        last_msgs = riwayat_chat[-3:-1]  # 2 pesan sebelum user
+        konteks = "\n".join([f"{m['role']}: {m['content'][:200]}" for m in last_msgs])
+    
+    prompt = f"""Analisis pesan berikut. Apakah mengandung FAKTA PENTING TENTANG USER yang bersifat PERMANEN?
 
-PESAN: "{pesan_user}"
+KRITERIA FAKTA PENTING (harus dicatat):
+- Proyek yang sedang dikerjakan (bukan sekadar "nanti mau bikin")
+- Skill atau kemampuan ("Saya bisa Python")
+- Pekerjaan atau pendidikan ("Saya mahasiswa TI semester 5")
+- Preferensi KUAT yang konsisten ("Saya tidak suka kopi pahit")
+- Kontak atau identitas penting
+- Deadline atau target serius
+
+BUKAN FAKTA PENTING (abaikan):
+- Obrolan ringan atau candaan
+- Kebutuhan sesaat ("Saya butuh beli pulsa")
+- Rencana belum pasti ("Saya kepikiran mau belajar X")
+- Info harga atau list belanja
+- Pertanyaan atau permintaan tolong
+- Opini tentang sesuatu yang bukan diri user
+
+KONTEKS PERCAKAPAN (jika ada):
+{konteks}
+
+PESAN USER:
+"{pesan_user}"
 
 Jawab JSON saja:
-{{"is_fact": true/false, "confidence": 0.0-1.0, "fact": "fakta ringkas", "category": "proyek/preferensi/kontak/jadwal/akun/umum"}}"""
+{{"is_fact": true/false, "confidence": 0.0-1.0, "fact": "fakta ringkas (tulis ulang dalam bentuk pernyataan tentang user)", "category": "proyek/preferensi/kontak/jadwal/akun/skill/pekerjaan/pendidikan/umum"}}
+
+Jika ragu antara fakta penting atau bukan, pilih false (lebih baik tidak mencatat daripada mencatat yang salah)."""
 
     try:
         response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Jawab HANYA JSON. Tidak boleh teks lain."},
+            {"role": "system", "content": "Kamu adalah filter fakta yang KETAT. Hanya catat fakta yang benar-benar penting dan permanen. Jawab HANYA JSON."},
             {"role": "user", "content": prompt}
         ])
         hasil = response["message"]["content"].strip()
-        if hasil.startswith("```"): hasil = hasil.split("\n", 1)[1].rstrip("```")
+        if hasil.startswith("```"):
+            hasil = hasil.split("\n", 1)[1].rstrip("```")
+        hasil = hasil.strip()
+        
         data = json.loads(hasil)
-        if data.get("is_fact") and data.get("confidence", 0) >= AUTO_EXTRACT_THRESHOLD:
-            return {"fact": data["fact"], "category": data.get("category", "umum"), "confidence": data["confidence"]}
+        
+        # Confidence threshold lebih tinggi
+        if data.get("is_fact") and data.get("confidence", 0) >= 0.75:  # Naik dari 0.7
+            return {
+                "fact": data["fact"],
+                "category": data.get("category", "umum"),
+                "confidence": data["confidence"]
+            }
+        
+        return None
+    
     except Exception as e:
         logger.error(f"Auto-extract failed: {type(e).__name__}: {str(e)}", exc_info=True)
-    return None
+        return None
 
 # ========== FUNGSI AI ==========
 # ========== FUNGSI MEMORY INTELLIGENCE (V4.5) ==========
