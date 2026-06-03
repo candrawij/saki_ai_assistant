@@ -15859,3 +15859,84 @@ json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
 2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
 2026-06-04 00:34:22,080 - saki - INFO - <module>:797 - ==================================================
+2026-06-04 00:49:04,917 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:49:10,481 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:49:14,075 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:49:14,118 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:49:14,123 - saki - INFO - <module>:800 - ==================================================
+2026-06-04 00:49:14,124 - saki - INFO - <module>:801 - Saki v4.5.1 starting...
+2026-06-04 00:49:14,124 - saki - INFO - <module>:802 - Model: qwen3:4b
+2026-06-04 00:49:14,125 - saki - INFO - <module>:803 - Database: saki_memory.db
+2026-06-04 00:49:14,125 - saki - INFO - <module>:804 - Documents: documents
+2026-06-04 00:49:14,126 - saki - INFO - <module>:805 - ==================================================
+2026-06-04 00:49:22,255 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:49:22,259 - saki - INFO - <module>:800 - ==================================================
+2026-06-04 00:49:22,260 - saki - INFO - <module>:801 - Saki v4.5.1 starting...
+2026-06-04 00:49:22,260 - saki - INFO - <module>:802 - Model: qwen3:4b
+2026-06-04 00:49:22,261 - saki - INFO - <module>:803 - Database: saki_memory.db
+2026-06-04 00:49:22,261 - saki - INFO - <module>:804 - Documents: documents
+2026-06-04 00:49:22,262 - saki - INFO - <module>:805 - ==================================================
+2026-06-04 00:49:25,980 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:49:25,984 - saki - INFO - <module>:800 - ==================================================
+2026-06-04 00:49:25,985 - saki - INFO - <module>:801 - Saki v4.5.1 starting...
+2026-06-04 00:49:25,985 - saki - INFO - <module>:802 - Model: qwen3:4b
+2026-06-04 00:49:25,986 - saki - INFO - <module>:803 - Database: saki_memory.db
+2026-06-04 00:49:25,986 - saki - INFO - <module>:804 - Documents: documents
+2026-06-04 00:49:25,987 - saki - INFO - <module>:805 - ==================================================
+2026-06-04 00:51:06,568 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:51:06,572 - saki - INFO - <module>:800 - ==================================================
+2026-06-04 00:51:06,573 - saki - INFO - <module>:801 - Saki v4.5.1 starting...
+2026-06-04 00:51:06,573 - saki - INFO - <module>:802 - Model: qwen3:4b
+2026-06-04 00:51:06,574 - saki - INFO - <module>:803 - Database: saki_memory.db
+2026-06-04 00:51:06,575 - saki - INFO - <module>:804 - Documents: documents
+2026-06-04 00:51:06,575 - saki - INFO - <module>:805 - ==================================================
+2026-06-04 00:51:14,817 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:51:14,821 - saki - INFO - <module>:800 - ==================================================
+2026-06-04 00:51:14,822 - saki - INFO - <module>:801 - Saki v4.5.1 starting...
+2026-06-04 00:51:14,822 - saki - INFO - <module>:802 - Model: qwen3:4b
+2026-06-04 00:51:14,823 - saki - INFO - <module>:803 - Database: saki_memory.db
+2026-06-04 00:51:14,823 - saki - INFO - <module>:804 - Documents: documents
+2026-06-04 00:51:14,824 - saki - INFO - <module>:805 - ==================================================
+2026-06-04 00:52:04,887 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 00:52:04,902 - saki - INFO - <module>:800 - ==================================================
+2026-06-04 00:52:04,904 - saki - INFO - <module>:801 - Saki v4.5.1 starting...
+2026-06-04 00:52:04,905 - saki - INFO - <module>:802 - Model: qwen3:4b
+2026-06-04 00:52:04,906 - saki - INFO - <module>:803 - Database: saki_memory.db
+2026-06-04 00:52:04,907 - saki - INFO - <module>:804 - Documents: documents
+2026-06-04 00:52:04,908 - saki - INFO - <module>:805 - ==================================================
+2026-06-04 01:05:31,535 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:05:35,649 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:05:36,920 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:05:36,963 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:05:36,968 - saki - INFO - <module>:804 - ==================================================
+2026-06-04 01:05:36,969 - saki - INFO - <module>:805 - Saki v4.5.1 starting...
+2026-06-04 01:05:36,970 - saki - INFO - <module>:806 - Model: qwen3:4b
+2026-06-04 01:05:36,970 - saki - INFO - <module>:807 - Database: saki_memory.db
+2026-06-04 01:05:36,971 - saki - INFO - <module>:808 - Documents: documents
+2026-06-04 01:05:36,972 - saki - INFO - <module>:809 - ==================================================
+2026-06-04 01:05:42,581 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:05:43,558 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:06:41,927 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:09:35,865 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:09:35,879 - saki - INFO - <module>:1178 - User clicked merge: 4 + 6
+2026-06-04 01:09:35,884 - saki - INFO - <module>:1190 - Merging: [proyek] saya mengerjakan website topup sebagai tugas akhir + [proyek] Saya sedang mengerjakan website topup menggunakan 
+2026-06-04 01:09:35,885 - saki - INFO - merge_fakta_dengan_ai:706 - Merging 2 facts: [4, 6]
+2026-06-04 01:09:58,201 - saki - INFO - merge_fakta_dengan_ai:722 - Merge result: Saya sedang mengerjakan website topup sebagai tugas akhir mata kuliah PSD menggunakan Laravel....
+2026-06-04 01:09:58,201 - saki - INFO - <module>:1204 - Saving merged fact: [proyek] Saya sedang mengerjakan website topup sebagai tuga... (imp=5)
+2026-06-04 01:09:58,208 - saki - INFO - simpan_fakta:254 - Saved fact: [proyek] Saya sedang mengerjakan website topup sebagai tuga... (imp=5, src=manual)
+2026-06-04 01:09:58,220 - saki - INFO - <module>:1211 - Merge complete: 4 + 6 -> new fact saved
+2026-06-04 01:09:58,264 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:10:01,237 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:10:01,295 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:10:55,159 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:10:56,270 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:11:02,798 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:11:29,701 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:12:55,813 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:15:07,156 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:16:35,100 - saki - INFO - simpan_fakta:254 - Saved fact: [preferensi] preferensi kemah dan kegiatan luar ruangan... (imp=5, src=auto)
+2026-06-04 01:16:35,145 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:20:44,811 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:20:58,000 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:21:07,329 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:21:07,866 - saki - INFO - <module>:89 - Logging system initialized

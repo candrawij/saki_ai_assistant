@@ -796,13 +796,18 @@ with st.sidebar:
 # ========== HALAMAN UTAMA ==========
 if st.session_state.authenticated:
     init_db()
-    # Startup logging
-    logger.info("=" * 50)
-    logger.info(f"Saki v4.5.1 starting...")
-    logger.info(f"Model: {MODEL}")
-    logger.info(f"Database: {DB_FILE}")
-    logger.info(f"Documents: {DOCUMENTS_FOLDER}")
-    logger.info("=" * 50)
+    # Startup logging — hanya sekali
+    if "startup_logged" not in st.session_state:
+        st.session_state.startup_logged = False
+    
+    if not st.session_state.startup_logged:
+        logger.info("=" * 50)
+        logger.info(f"Saki v4.5.1 starting...")
+        logger.info(f"Model: {MODEL}")
+        logger.info(f"Database: {DB_FILE}")
+        logger.info(f"Documents: {DOCUMENTS_FOLDER}")
+        logger.info("=" * 50)
+        st.session_state.startup_logged = True
     
     # ===== CHAT =====
     if menu == "💬 Chat":
@@ -1135,34 +1140,97 @@ if st.session_state.authenticated:
         # === DUPLICATE DETECTION ===
         st.subheader("🔍 Duplicate Detection")
         
+        # Simpan hasil deteksi di session state agar tidak hilang saat re-run
+        if "duplicate_results" not in st.session_state:
+            st.session_state.duplicate_results = None
+        if "merge_message" not in st.session_state:
+            st.session_state.merge_message = None
+        
         if st.button("🔎 Cari Duplikat (AI Analysis)"):
             with st.spinner("Menganalisis kemiripan fakta..."):
-                duplikat = deteksi_duplikat_semantik()
-                
-                if duplikat:
-                    for d in duplikat:
-                        st.warning(f"**#{d['id1']}** ↔ **#{d['id2']}**")
-                        st.write(f"Alasan: {d['reason']}")
-                        st.write(f"Saran: {d['suggestion']}")
-                        
-                        if st.button(f"Merge #{d['id1']} + #{d['id2']}", key=f"merge_{d['id1']}_{d['id2']}"):
-                            f1 = lihat_fakta_by_id(d['id1'])
-                            f2 = lihat_fakta_by_id(d['id2'])
-                            if f1 and f2:
-                                hasil = merge_fakta_dengan_ai([f1, f2])
-                                kategori = f1[1]
-                                new_importance = max(f1[5], f2[5])
-                                success, error = simpan_fakta(kategori, hasil, "manual", 1.0, new_importance)
-                                if not success:
-                                    logger.warning(f"Merge save failed: {error}")
-                                hapus_fakta(d['id1'])
-                                hapus_fakta(d['id2'])
-                                st.success(f"Berhasil merge! Fakta baru tersimpan.")
-                                st.rerun()
-                        st.divider()
-                else:
-                    st.success("✅ Tidak ada duplikat terdeteksi!")
+                st.session_state.duplicate_results = deteksi_duplikat_semantik()
+                st.session_state.merge_message = None
+            st.rerun()
         
+        # Tampilkan hasil deteksi dari session state
+        if st.session_state.duplicate_results is not None:
+            duplikat = st.session_state.duplicate_results
+            
+            if not duplikat:
+                st.success("✅ Tidak ada duplikat terdeteksi!")
+            else:
+                st.info(f"Ditemukan {len(duplikat)} potensi duplikat:")
+                
+                for i, d in enumerate(duplikat):
+                    with st.container():
+                        st.warning(f"**#{d['id1']}** ↔ **#{d['id2']}**")
+                        st.write(f"Alasan: {d.get('reason', 'Tidak ada alasan')}")
+                        st.write(f"Saran: {d.get('suggestion', 'Merge jika sama')}")
+                        
+                        # Tombol merge dalam form agar tidak conflict
+                        with st.form(key=f"merge_form_{d['id1']}_{d['id2']}_{i}"):
+                            submitted = st.form_submit_button(
+                                f"🔗 Merge #{d['id1']} + #{d['id2']}",
+                                use_container_width=True
+                            )
+                            
+                            if submitted:
+                                logger.info(f"User clicked merge: {d['id1']} + {d['id2']}")
+                                
+                                f1 = lihat_fakta_by_id(d['id1'])
+                                f2 = lihat_fakta_by_id(d['id2'])
+                                
+                                if not f1:
+                                    st.session_state.merge_message = f"❌ Fakta #{d['id1']} tidak ditemukan."
+                                    logger.error(f"Merge failed: fact {d['id1']} not found")
+                                elif not f2:
+                                    st.session_state.merge_message = f"❌ Fakta #{d['id2']} tidak ditemukan."
+                                    logger.error(f"Merge failed: fact {d['id2']} not found")
+                                else:
+                                    logger.info(f"Merging: [{f1[1]}] {f1[2][:50]} + [{f2[1]}] {f2[2][:50]}")
+                                    
+                                    hasil = merge_fakta_dengan_ai([f1, f2])
+                                    
+                                    if isinstance(hasil, str) and hasil.startswith("[Gagal"):
+                                        st.session_state.merge_message = f"❌ {hasil}"
+                                        logger.error(f"Merge AI failed: {hasil}")
+                                    else:
+                                        kategori = f1[1]
+                                        # Akses index yang aman
+                                        imp1 = f1[5] if len(f1) > 5 else 5
+                                        imp2 = f2[5] if len(f2) > 5 else 5
+                                        new_importance = max(imp1, imp2)
+                                        
+                                        logger.info(f"Saving merged fact: [{kategori}] {hasil[:50]}... (imp={new_importance})")
+                                        
+                                        success, error = simpan_fakta(kategori, hasil, "manual", 1.0, new_importance)
+                                        
+                                        if success:
+                                            hapus_fakta(d['id1'])
+                                            hapus_fakta(d['id2'])
+                                            logger.info(f"Merge complete: {d['id1']} + {d['id2']} -> new fact saved")
+                                            st.session_state.merge_message = f"✅ Berhasil merge! Fakta #{d['id1']} + #{d['id2']} digabung."
+                                            # Reset hasil deteksi
+                                            st.session_state.duplicate_results = None
+                                        else:
+                                            logger.error(f"Merge save failed: {error}")
+                                            st.session_state.merge_message = f"❌ Gagal menyimpan: {error}"
+                                
+                                st.rerun()
+                        
+                        st.divider()
+        
+        # Tampilkan pesan merge
+        if st.session_state.merge_message:
+            if "✅" in st.session_state.merge_message:
+                st.success(st.session_state.merge_message)
+            else:
+                st.error(st.session_state.merge_message)
+            # Clear setelah ditampilkan
+            if st.button("OK"):
+                st.session_state.merge_message = None
+                st.rerun()
+
         st.divider()
         
         # === FAKTA TERURUT IMPORTANCE ===
