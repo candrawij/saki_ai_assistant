@@ -589,65 +589,117 @@ if st.session_state.authenticated:
         col1, col2 = st.columns(2)
         with col1:
             st.info(f"**Model AI:** {MODEL}")
-            st.info(f"**Database:** {DB_FILE}")
+            st.info(f"**Database:** saki_memory.db")
         with col2:
             st.info(f"**Dokumen:** {DOCUMENTS_FOLDER}/")
-            st.info(f"**ChromaDB:** {CHROMA_FOLDER}/")
+            st.info(f"**ChromaDB:** chroma_db/")
         
         st.divider()
         
         st.subheader("📤 Ekspor Memory")
-        if st.button("Ekspor ke JSON & Markdown"):
+        if st.button("Ekspor ke JSON"):
             fakta = lihat_semua_fakta()
             if fakta:
                 os.makedirs(EXPORT_FOLDER, exist_ok=True)
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
                 
-                json_data = [{"id": f[0], "category": f[1], "content": f[2], "source": f[3], "confidence": f[4], "importance": f[5], "access_count": f[6], "last_accessed": f[7], "created_at": f[8]} for f in fakta]
+                json_data = []
+                for f in fakta:
+                    json_data.append({
+                        "id": f[0],
+                        "category": f[1],
+                        "content": f[2],
+                        "source": f[3],
+                        "confidence": f[4],
+                        "importance": f[5],
+                        "access_count": f[6],
+                        "last_accessed": f[7],
+                        "created_at": f[8]
+                    })
                 
                 json_path = f"{EXPORT_FOLDER}/memory_{timestamp}.json"
                 with open(json_path, "w", encoding="utf-8") as f:
                     json.dump(json_data, f, indent=2, ensure_ascii=False)
                 
-                st.success(f"Ekspor berhasil: {json_path}")
-                st.download_button("📥 Download JSON", json.dumps(json_data, indent=2, ensure_ascii=False), f"memory_{timestamp}.json", "application/json")
+                st.success(f"✅ Ekspor berhasil: `{json_path}`")
+                st.download_button(
+                    "📥 Download JSON",
+                    json.dumps(json_data, indent=2, ensure_ascii=False),
+                    f"memory_{timestamp}.json",
+                    "application/json"
+                )
+            else:
+                st.warning("Tidak ada fakta untuk diekspor.")
         
         st.divider()
         
         st.subheader("📥 Impor Memory")
-        imported_file = st.file_uploader("Upload file JSON", type=["json"])
-        if imported_file and st.button("Impor"):
+        st.caption("Upload file JSON hasil ekspor sebelumnya.")
+        
+        imported_file = st.file_uploader("Upload file JSON", type=["json"], key="import_json")
+        if imported_file and st.button("📥 Impor"):
             try:
                 data = json.loads(imported_file.read())
-                imported, skipped = 0, 0
+                imported = 0
+                skipped = 0
+                
                 for item in data:
                     content = item.get("content", "")
                     category = item.get("category", "umum")
+                    
                     existing = cek_fakta_duplikat(content)
                     if existing:
                         skipped += 1
+                        continue
+                    
+                    # Auto-rate importance
+                    try:
+                        importance = auto_rate_importance(content, category)
+                    except Exception:
+                        importance = 5
+                    
+                    success, error = simpan_fakta(
+                        category=category,
+                        content=content,
+                        source=item.get("source", "imported"),
+                        confidence=item.get("confidence", 1.0),
+                        importance=importance
+                    )
+                    
+                    if success:
+                        imported += 1
                     else:
-                        # Rate importance automatically for imported items
-                        try:
-                            importance = auto_rate_importance(content, category)
-                        except Exception as e:
-                            logger.error(f"Failed to auto-rate importance for import: {str(e)}", exc_info=True)
-                            importance = 5
-
-                        success, error = simpan_fakta(category, content, item.get("source", "imported"), item.get("confidence", 1.0), importance)
-                        if not success:
-                            skipped += 1
-                            logger.warning(f"Imported fact skipped (save failed): {error}")
-                        else:
-                            imported += 1
-                st.success(f"Impor: {imported} baru, {skipped} duplikat")
+                        skipped += 1
+                        logger.warning(f"Import skipped: {error}")
+                
+                st.success(f"✅ Impor selesai: {imported} baru, {skipped} dilewati")
+                
+            except json.JSONDecodeError:
+                st.error("❌ File bukan JSON yang valid.")
+                logger.error("Import failed: invalid JSON")
             except Exception as e:
-                logger.error(f"Failed to import memory file: {str(e)}", exc_info=True)
-                st.error("File tidak valid!")
+                st.error(f"❌ Gagal impor: {type(e).__name__}")
+                logger.error(f"Import failed: {str(e)}", exc_info=True)
+        
+        st.divider()
+        
+        st.subheader("📊 Statistik")
+        
+        fakta = lihat_semua_fakta()
+        docs = lihat_semua_dokumen()
+        reflections = lihat_semua_reflections()
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Fakta", len(fakta))
+        with col2:
+            st.metric("Dokumen", len(docs))
+        with col3:
+            st.metric("Insight", len(reflections))
         
         st.divider()
         st.caption(f"🤖 {NAMA_AI} v5.0 — Reflection Engine | Streamlit + Ollama")
-
+        
 # ========== FOOTER ==========
 st.sidebar.divider()
 st.sidebar.caption(f"🤖 {NAMA_AI} v5.0 — Reflection Engine")
