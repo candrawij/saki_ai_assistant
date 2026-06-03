@@ -15940,3 +15940,130 @@ json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 2026-06-04 01:20:58,000 - saki - INFO - <module>:89 - Logging system initialized
 2026-06-04 01:21:07,329 - saki - INFO - <module>:89 - Logging system initialized
 2026-06-04 01:21:07,866 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:44,792 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:45,603 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:46,525 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:47,194 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:48,711 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:54,933 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:23:58,381 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:38:43,038 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:51:45,214 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:51:45,257 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:51:45,260 - saki - INFO - <module>:804 - ==================================================
+2026-06-04 01:51:45,260 - saki - INFO - <module>:805 - Saki v4.5.1 starting...
+2026-06-04 01:51:45,262 - saki - INFO - <module>:806 - Model: qwen3:4b
+2026-06-04 01:51:45,262 - saki - INFO - <module>:807 - Database: saki_memory.db
+2026-06-04 01:51:45,263 - saki - INFO - <module>:808 - Documents: documents
+2026-06-04 01:51:45,264 - saki - INFO - <module>:809 - ==================================================
+2026-06-04 01:52:11,660 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:53:26,928 - saki - INFO - simpan_fakta:254 - Saved fact: [preferensi] preferensi sepatu gunung untuk kemah dekat... (imp=5, src=auto)
+2026-06-04 01:53:26,983 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:57:15,318 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 01:58:48,973 - saki - INFO - simpan_fakta:254 - Saved fact: [preferensi] budget kisaran 500 ribu hingga 700 ribu... (imp=5, src=auto)
+2026-06-04 01:58:49,016 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:00:28,672 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:02:17,201 - saki - INFO - simpan_fakta:254 - Saved fact: [preferensi] user membutuhkan daftar barang untuk kemah... (imp=5, src=auto)
+2026-06-04 02:02:17,268 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:02:51,383 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:03:00,623 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:03:00,916 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:03:33,084 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:03:38,834 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:03:55,181 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:04:05,131 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:04:11,077 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:04:11,118 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:04:11,123 - saki - INFO - <module>:804 - ==================================================
+2026-06-04 02:04:11,123 - saki - INFO - <module>:805 - Saki v4.5.1 starting...
+2026-06-04 02:04:11,124 - saki - INFO - <module>:806 - Model: qwen3:4b
+2026-06-04 02:04:11,124 - saki - INFO - <module>:807 - Database: saki_memory.db
+2026-06-04 02:04:11,125 - saki - INFO - <module>:808 - Documents: documents
+2026-06-04 02:04:11,125 - saki - INFO - <module>:809 - ==================================================
+2026-06-04 02:04:13,006 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:04:15,397 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:04:18,363 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:05:45,134 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:06:07,072 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:06:07,082 - saki - INFO - <module>:1178 - User clicked merge: 7 + 9
+2026-06-04 02:06:07,087 - saki - INFO - <module>:1190 - Merging: [preferensi] Saya suka anime dan wanita berkacamata. + [preferensi] saya suka wanita yang rambutnya panjang
+2026-06-04 02:06:07,088 - saki - INFO - merge_fakta_dengan_ai:706 - Merging 2 facts: [7, 9]
+2026-06-04 02:06:51,608 - saki - INFO - merge_fakta_dengan_ai:722 - Merge result: Saya suka anime dan wanita yang rambutnya panjang dan berkacamata....
+2026-06-04 02:06:51,608 - saki - INFO - <module>:1204 - Saving merged fact: [preferensi] Saya suka anime dan wanita yang rambutnya panjang ... (imp=5)
+2026-06-04 02:06:51,617 - saki - INFO - simpan_fakta:254 - Saved fact: [preferensi] Saya suka anime dan wanita yang rambutnya panjang ... (imp=5, src=manual)
+2026-06-04 02:06:51,630 - saki - INFO - <module>:1211 - Merge complete: 7 + 9 -> new fact saved
+2026-06-04 02:06:51,673 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:06:59,887 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:06:59,939 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:11,726 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:12,164 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:20,513 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:20,514 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:20,614 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:30,773 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:30,837 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:34,205 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:34,293 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:48,815 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:07:59,943 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:08:23,456 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:08:26,414 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:08:26,422 - saki - INFO - proses_upload:488 - Processing upload: laporan_kp_candra.pdf
+2026-06-04 02:08:27,140 - saki - INFO - ekstrak_teks_dari_pdf:422 - Berhasil ekstrak PDF: tmp1tofejji.pdf (49817 chars)
+2026-06-04 02:09:42,551 - saki - INFO - proses_upload:531 - Upload berhasil: laporan_kp_candra.pdf -> doc_id=4
+2026-06-04 02:09:42,552 - saki - DEBUG - proses_upload:541 - Temp file cleaned: C:\Users\Candra\AppData\Local\Temp\tmp1tofejji.pdf
+2026-06-04 02:11:57,569 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:13:16,642 - saki - INFO - <module>:890 - Summarized text: 6357 -> 453 chars
+2026-06-04 02:13:55,953 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:15:12,352 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:15:13,064 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:33:10,975 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:33:17,981 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:33:20,244 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:33:20,286 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:36:59,200 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:02,728 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:03,970 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:09,042 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:09,192 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:09,260 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:09,275 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:09,276 - saki - INFO - <module>:1009 - ==================================================
+2026-06-04 02:37:09,277 - saki - INFO - <module>:1010 - Saki v4.5.1 starting...
+2026-06-04 02:37:09,277 - saki - INFO - <module>:1011 - Model: qwen3:4b
+2026-06-04 02:37:09,278 - saki - INFO - <module>:1012 - Database: saki_memory.db
+2026-06-04 02:37:09,279 - saki - INFO - <module>:1013 - Documents: documents
+2026-06-04 02:37:09,279 - saki - INFO - <module>:1014 - ==================================================
+2026-06-04 02:37:10,899 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:10,908 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:11,813 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:11,818 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:14,429 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:14,433 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:16,940 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:16,944 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:19,579 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:19,584 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:20,781 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:20,785 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:37:26,482 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:37:26,487 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:38:48,109 - saki - INFO - simpan_reflection:396 - Saved reflection: [insight] Proyek Website Topup (sources: [10])
+2026-06-04 02:38:48,113 - saki - INFO - simpan_reflection:396 - Saved reflection: [insight] Preferensi Kemah dan Kebutuhan (sources: [11, 12, 13, 14])
+2026-06-04 02:38:48,119 - saki - INFO - simpan_reflection:396 - Saved reflection: [insight] Preferensi Pribadi (sources: [5, 8, 15])
+2026-06-04 02:38:48,123 - saki - INFO - tandai_fakta_reflected:446 - Marked 8 facts as reflected: [5, 8, 10, 11, 12, 13, 14, 15]
+2026-06-04 02:38:48,123 - saki - INFO - save_reflections:961 - Saved 3 reflections, marked 8 facts as reflected
+2026-06-04 02:38:48,163 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:38:48,171 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:41:39,379 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:41:39,385 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 02:43:32,248 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 02:43:32,252 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 03:55:33,804 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 03:55:33,810 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 04:00:42,905 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 04:00:42,910 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 04:03:09,355 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 04:03:09,360 - saki - DEBUG - init_db:199 - Database initialized successfully
+2026-06-04 04:03:14,613 - saki - INFO - <module>:89 - Logging system initialized
+2026-06-04 04:03:14,618 - saki - DEBUG - init_db:199 - Database initialized successfully

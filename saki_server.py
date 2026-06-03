@@ -135,52 +135,72 @@ Saat merangkum, gunakan format:
 
 # ========== DATABASE ==========
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    
-    c.execute('''CREATE TABLE IF NOT EXISTS conversations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        role TEXT NOT NULL,
-        content TEXT NOT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )''')
-    
-    c.execute('''CREATE TABLE IF NOT EXISTS facts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT DEFAULT 'umum',
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        deleted INTEGER DEFAULT 0
-    )''')
-    
-    c.execute('''CREATE TABLE IF NOT EXISTS documents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        filename TEXT NOT NULL,
-        filepath TEXT NOT NULL,
-        file_type TEXT NOT NULL,
-        summary TEXT,
-        full_text TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )''')
-    
-    # Auto-migration
-    c.execute("PRAGMA table_info(facts)")
-    columns = [col[1] for col in c.fetchall()]
-    if 'source' not in columns:
-        c.execute("ALTER TABLE facts ADD COLUMN source TEXT DEFAULT 'manual'")
-    if 'confidence' not in columns:
-        c.execute("ALTER TABLE facts ADD COLUMN confidence REAL DEFAULT 1.0")
-    # V4.5: Kolom baru untuk Memory Intelligence
-    if 'importance' not in columns:
-        c.execute("ALTER TABLE facts ADD COLUMN importance INTEGER DEFAULT 5")
-    if 'access_count' not in columns:
-        c.execute("ALTER TABLE facts ADD COLUMN access_count INTEGER DEFAULT 0")
-    if 'last_accessed' not in columns:
-        c.execute("ALTER TABLE facts ADD COLUMN last_accessed TIMESTAMP DEFAULT NULL")
-    
-    conn.commit()
-    conn.close()
+    """Inisialisasi database. Auto-migration untuk kolom baru."""
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''')
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS facts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT DEFAULT 'umum',
+            content TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            deleted INTEGER DEFAULT 0
+        )''')
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            filepath TEXT NOT NULL,
+            file_type TEXT NOT NULL,
+            summary TEXT,
+            full_text TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''')
+        
+        # V5: Tabel reflections
+        c.execute('''CREATE TABLE IF NOT EXISTS reflections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            source_facts TEXT,
+            category TEXT DEFAULT 'insight',
+            importance INTEGER DEFAULT 9,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''')
+        
+        # Auto-migration: cek dan tambah kolom baru
+        c.execute("PRAGMA table_info(facts)")
+        columns = [col[1] for col in c.fetchall()]
+        
+        if 'source' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN source TEXT DEFAULT 'manual'")
+        if 'confidence' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN confidence REAL DEFAULT 1.0")
+        if 'importance' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN importance INTEGER DEFAULT 5")
+        if 'access_count' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN access_count INTEGER DEFAULT 0")
+        if 'last_accessed' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN last_accessed TIMESTAMP DEFAULT NULL")
+        if 'reflected' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN reflected INTEGER DEFAULT 0")
+        
+        conn.commit()
+        conn.close()
+        logger.debug("Database initialized successfully")
+        
+    except Exception as e:
+        logger.error(f"Database initialization failed: {str(e)}", exc_info=True)
+        raise
 
 # ========== FUNGSI DATABASE (sama seperti V3) ==========
 def simpan_chat(role, content):
@@ -361,6 +381,106 @@ def simpan_dokumen(filename, filepath, file_type, full_text, summary):
         logger.error(f"Failed to save document: {str(e)}", exc_info=True)
         return None
 
+# ========== REFLECTIONS (V5) ==========
+def simpan_reflection(title: str, content: str, source_facts: List[int], category: str = "insight", importance: int = 9) -> Optional[int]:
+    """Simpan hasil reflection. Return reflection_id atau None."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO reflections (title, content, source_facts, category, importance) VALUES (?, ?, ?, ?, ?)",
+                (title, content, json.dumps(source_facts), category, importance)
+            )
+            reflection_id = c.lastrowid
+            conn.commit()
+            logger.info(f"Saved reflection: [{category}] {title} (sources: {source_facts})")
+            return reflection_id
+    except Exception as e:
+        logger.error(f"Failed to save reflection: {str(e)}", exc_info=True)
+        return None
+
+def lihat_semua_reflections() -> List[Tuple]:
+    """Ambil semua reflections."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, title, content, source_facts, category, importance, created_at FROM reflections ORDER BY created_at DESC")
+            results = c.fetchall()
+        return results
+    except Exception as e:
+        logger.error(f"Failed to fetch reflections: {str(e)}", exc_info=True)
+        return []
+
+def lihat_reflection_by_id(reflection_id: int) -> Optional[Tuple]:
+    """Ambil satu reflection by ID."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, title, content, source_facts, category, importance, created_at FROM reflections WHERE id = ?", (reflection_id,))
+            result = c.fetchone()
+        return result
+    except Exception as e:
+        logger.error(f"Failed to fetch reflection {reflection_id}: {str(e)}", exc_info=True)
+        return None
+
+def hapus_reflection(reflection_id: int) -> bool:
+    """Hapus reflection."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("DELETE FROM reflections WHERE id = ?", (reflection_id,))
+            conn.commit()
+        logger.info(f"Deleted reflection #{reflection_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to delete reflection {reflection_id}: {str(e)}", exc_info=True)
+        return False
+
+def tandai_fakta_reflected(fact_ids: List[int]) -> bool:
+    """Tandai fakta sebagai sudah di-reflect."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.executemany("UPDATE facts SET reflected = 1 WHERE id = ?", [(fid,) for fid in fact_ids])
+            conn.commit()
+        logger.info(f"Marked {len(fact_ids)} facts as reflected: {fact_ids}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to mark facts as reflected: {str(e)}", exc_info=True)
+        return False
+
+def ambil_fakta_belum_reflected() -> List[Tuple]:
+    """Ambil fakta yang belum di-reflect."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, category, content FROM facts WHERE deleted = 0 AND reflected = 0 ORDER BY id")
+            results = c.fetchall()
+        return results
+    except Exception as e:
+        logger.error(f"Failed to fetch unreflected facts: {str(e)}", exc_info=True)
+        return []
+
+def get_reflection_stats() -> dict:
+    """Statistik reflection."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT COUNT(*) FROM reflections")
+            total = c.fetchone()[0]
+            c.execute("SELECT COUNT(*) FROM facts WHERE deleted = 0 AND reflected = 0")
+            unreflected = c.fetchone()[0]
+            c.execute("SELECT COUNT(*) FROM facts WHERE deleted = 0 AND reflected = 1")
+            reflected = c.fetchone()[0]
+        return {
+            "total_reflections": total,
+            "unreflected_facts": unreflected,
+            "reflected_facts": reflected
+        }
+    except Exception as e:
+        logger.error(f"Failed to get reflection stats: {str(e)}", exc_info=True)
+        return {"total_reflections": 0, "unreflected_facts": 0, "reflected_facts": 0}
+
 # ========== CHROMA DB ==========
 def init_chroma():
     os.makedirs(CHROMA_FOLDER, exist_ok=True)
@@ -393,6 +513,7 @@ def tambah_ke_chroma(doc_id, full_text, filename):
         return False
 
 def cari_dokumen_semantik(query, n_results=3):
+    
     try:
         collection = init_chroma()
         results = collection.query(query_texts=[query], n_results=n_results)
@@ -756,6 +877,90 @@ def chat_saki(pesan, riwayat_chat=None):
     response = ollama.chat(model=MODEL, messages=messages)
     return response["message"]["content"]
 
+# ========== REFLECTION AI (V5) ==========
+def generate_reflection() -> Tuple[List[dict], Optional[str]]:
+    """
+    Analisis fakta yang belum di-reflect, hasilkan insight.
+    Return (list_of_insights, error_message)
+    """
+    fakta = ambil_fakta_belum_reflected()
+    if not fakta:
+        return [], None
+
+    # Bangun prompt dengan daftar fakta
+    fakta_list = "\n".join([f"- [#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
+
+    prompt = f"""Analisis daftar fakta berikut dan kelompokkan menjadi INSIGHT/INSIGHTs.
+Balikkan hanya JSON array dengan objek: {{"title": "...", "content": "...", "source_ids": [1,2], "category": "insight"}}
+Jangan sertakan teks lain.
+
+Fakta:
+{fakta_list}
+"""
+
+    try:
+        response = ollama.chat(model=MODEL, messages=[
+            {"role": "system", "content": "Jawab HANYA JSON array."},
+            {"role": "user", "content": prompt}
+        ])
+        raw = response["message"]["content"].strip()
+
+        if raw.startswith("```"):
+            try:
+                raw = raw.split("\n", 1)[1].rstrip("```")
+            except Exception:
+                raw = raw.strip('`')
+
+        # Try parse
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return parsed, None
+        except Exception:
+            pass
+
+        # Fallback: extract first JSON array
+        m = re.search(r"(\[.*\])", raw, re.S)
+        if m:
+            try:
+                parsed = json.loads(m.group(1))
+                if isinstance(parsed, list):
+                    return parsed, None
+            except Exception:
+                logger.debug("generate_reflection: failed to parse extracted JSON", exc_info=True)
+
+        return [], "AI returned unexpected format for reflections."
+    except Exception as e:
+        logger.error(f"generate_reflection failed: {type(e).__name__}: {str(e)}", exc_info=True)
+        return [], f"Gagal menghasilkan reflection: {type(e).__name__}"
+
+def save_reflections(insights: List[dict]) -> int:
+    """Simpan hasil reflection ke database. Return jumlah yang tersimpan."""
+    saved = 0
+    all_source_ids = []
+
+    for insight in insights:
+        title = insight.get("title", "Untitled Insight")
+        content = insight.get("content", "")
+        source_ids = insight.get("source_ids", [])
+        category = insight.get("category", "insight")
+
+        if not content or not source_ids:
+            logger.warning(f"Skipping empty insight: {title}")
+            continue
+
+        reflection_id = simpan_reflection(title, content, source_ids, category, importance=9)
+        if reflection_id:
+            saved += 1
+            all_source_ids.extend(source_ids)
+
+    # Tandai fakta yang sudah di-reflect
+    if all_source_ids:
+        tandai_fakta_reflected(list(set(all_source_ids)))
+
+    logger.info(f"Saved {saved} reflections, marked {len(set(all_source_ids))} facts as reflected")
+    return saved
+
 # ========== STREAMLIT UI ==========
 st.set_page_config(
     page_title=f"{NAMA_AI} - AI Pribadi",
@@ -782,11 +987,11 @@ with st.sidebar:
                 st.error("Password salah!")
         st.stop()
     else:
-        st.title(f"🤖 {NAMA_AI} v4.0")
-        st.caption("AI Pribadi — Server Lokal")
-        
+        st.title(f"🤖 {NAMA_AI} v5.0")
+        st.caption(f"AI Pribadi v5.0 — Reflection Engine")
+
         # Menu
-        menu = st.radio("Menu", ["💬 Chat", "📝 Ringkasan", "📚 Memory", "📄 Dokumen", "🧠 Intelligence", "⚙️ Pengaturan"])
+        menu = st.radio("Menu", ["💬 Chat", "📝 Ringkasan", "📚 Memory", "📄 Dokumen", "🧠 Intelligence", "🧠 Reflection", "⚙️ Pengaturan"])
         
         if st.button("🚪 Logout"):
             st.session_state.authenticated = False
@@ -1288,6 +1493,122 @@ if st.session_state.authenticated:
                         st.session_state[f"edit_intel_{f[0]}"] = False
                         st.rerun()
     
+    # ===== REFLECTION (V5) =====
+    elif menu == "🧠 Reflection":
+        st.title("🧠 Reflection Engine")
+        st.caption(f"{NAMA_AI} membangun pengetahuan tingkat tinggi dari fakta yang terkumpul")
+        
+        # Stats
+        stats = get_reflection_stats()
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("💡 Total Insight", stats["total_reflections"])
+        with col2:
+            st.metric("📝 Fakta Belum Di-reflect", stats["unreflected_facts"])
+        with col3:
+            st.metric("✅ Fakta Sudah Di-reflect", stats["reflected_facts"])
+        
+        st.divider()
+        
+        # Generate button
+        st.subheader("🔍 Generate Reflection")
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.write("AI akan menganalisis fakta yang belum di-reflect dan mengelompokkannya menjadi insight.")
+        with col2:
+            generate_btn = st.button("🧠 Generate Reflection", type="primary", use_container_width=True)
+
+        if generate_btn:
+            with st.spinner(f"⏳ {NAMA_AI} menganalisis fakta dan membangun insight..."):
+                insights, error = generate_reflection()
+                if error:
+                    st.warning(error)
+                elif not insights:
+                    st.info("Tidak ada insight yang bisa dibuat dari fakta saat ini.")
+                else:
+                    saved = save_reflections(insights)
+                    st.success(f"✅ {saved} insight berhasil disimpan!")
+                    st.rerun()
+
+        st.divider()
+
+        # List existing reflections
+        st.subheader("📋 Insight yang Sudah Ada")
+        reflections = lihat_semua_reflections()
+        if not reflections:
+            st.info("Belum ada insight. Klik 'Generate Reflection' untuk membuat yang pertama.")
+        else:
+            for r in reflections:
+                try:
+                    source_ids = json.loads(r[3]) if isinstance(r[3], str) else r[3]
+                    source_text = ", ".join([f"#{s}" for s in source_ids])
+                except Exception:
+                    source_text = str(r[3])
+
+                importance_bar = "⭐" * min(r[5], 5)
+
+                with st.expander(f"{importance_bar} [{r[4]}] {r[1]} (dari fakta {source_text})"):
+                    st.write(f"**Judul:** {r[1]}")
+                    st.write(f"**Insight:** {r[2]}")
+                    st.write(f"**Kategori:** {r[4]}")
+                    st.write(f"**Sumber:** {source_text}")
+                    st.write(f"**Dibuat:** {r[6]}")
+                    
+                    # Tampilkan fakta sumber
+                    if st.button(f"📖 Lihat Fakta Sumber #{r[0]}", key=f"source_{r[0]}"):
+                        with st.spinner("Mengambil fakta sumber..."):
+                            for sid in source_ids:
+                                f = lihat_fakta_by_id(sid)
+                                if f:
+                                    st.caption(f"**[#{f[0]}] [{f[1]}]** {f[2]}")
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button(f"✏️ Edit #{r[0]}", key=f"edit_ref_{r[0]}"):
+                            st.session_state[f"edit_ref_{r[0]}"] = True
+                    with col2:
+                        if st.button(f"🗑️ Hapus #{r[0]}", key=f"hapus_ref_{r[0]}"):
+                            hapus_reflection(r[0])
+                            st.rerun()
+
+                    if st.session_state.get(f"edit_ref_{r[0]}"):
+                        with st.form(key=f"edit_ref_form_{r[0]}"):
+                            new_title = st.text_input("Judul:", value=r[1])
+                            new_content = st.text_area("Insight:", value=r[2], height=150)
+                            submitted = st.form_submit_button("Simpan")
+                            if submitted:
+                                try:
+                                    with get_db() as conn:
+                                        c = conn.cursor()
+                                        c.execute("UPDATE reflections SET title = ?, content = ? WHERE id = ?", (new_title, new_content, r[0]))
+                                        conn.commit()
+                                    st.session_state[f"edit_ref_{r[0]}"] = False
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Gagal: {str(e)}")
+
+        st.divider()
+
+        # Info
+        with st.expander("ℹ️ Tentang Reflection Engine"):
+            st.write("""
+            **Reflection Engine** adalah fitur yang membuat AI tidak sekadar mengumpulkan fakta, 
+            tapi membangun pemahaman tingkat tinggi.
+            
+            **Cara kerja:**
+            1. AI menganalisis fakta-fakta yang belum di-reflect
+            2. Mengelompokkan fakta yang berhubungan
+            3. Menghasilkan insight — kesimpulan yang lebih bermakna
+            
+            **Tips:**
+            - Semakin banyak fakta, semakin bagus insight-nya
+            - Reflection bisa dijalankan berkali-kali
+            - Fakta yang sudah di-reflect tidak akan dianalisis ulang
+            - Insight bisa diedit seperti fakta biasa
+            """)
+
+        st.divider()
+
     # ===== PENGATURAN =====
     elif menu == "⚙️ Pengaturan":
         st.title("⚙️ Pengaturan")
@@ -1354,9 +1675,9 @@ if st.session_state.authenticated:
                 st.error("File tidak valid!")
         
         st.divider()
-        st.caption(f"🤖 {NAMA_AI} v4.0 — Server Pribadi | Streamlit + Ollama")
+        st.caption(f"🤖 {NAMA_AI} v5.0 — Reflection Engine | Streamlit + Ollama")
 
 # ========== FOOTER ==========
 st.sidebar.divider()
-st.sidebar.caption(f"🤖 {NAMA_AI} v4.0 — Server Pribadi")
+st.sidebar.caption(f"🤖 {NAMA_AI} v5.0 — Reflection Engine")
 st.sidebar.caption("Jalankan dengan: streamlit run saki_server.py")
