@@ -1,0 +1,99 @@
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-06-03 06:37:15,463 - saki - ERROR - deteksi_duplikat_semantik:646 - deteksi_duplikat_semantik failed: JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "E:\Priv Bot\saki_server.py", line 644, in deteksi_duplikat_semantik
+    return json.loads(hasil)
+  File "C:\laragon\bin\python\python-3.10\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\laragon\bin\python\python-3.10\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
