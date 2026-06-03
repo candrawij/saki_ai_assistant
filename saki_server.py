@@ -932,13 +932,19 @@ def generate_reflection() -> Tuple[List[dict], Optional[str]]:
     # Bangun prompt dengan daftar fakta
     fakta_list = "\n".join([f"- [#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
 
-    prompt = f"""Analisis daftar fakta berikut dan kelompokkan menjadi INSIGHT/INSIGHTs.
-Balikkan hanya JSON array dengan objek: {{"title": "...", "content": "...", "source_ids": [1,2], "category": "insight"}}
-Jangan sertakan teks lain.
+    prompt = f"""Analisis fakta-fakta berikut. HANYA kelompokkan fakta yang BENAR-BENAR terkait secara makna, bukan sekadar kata kunci yang sama.
 
-Fakta:
-{fakta_list}
-"""
+{fakta_text}
+
+ATURAN KETAT:
+1. Dua fakta bisa dikelompokkan jika membahas TOPIK YANG SAMA PERSIS, bukan sekadar kata kunci mirip
+2. "Saya suka kopi" dan "Saya butuh mesin kopi" → BOLEH digabung (topik: kopi)
+3. "Saya suka kopi" dan "Saya suka anime" → JANGAN digabung (topik beda: kopi vs anime)
+4. Insight harus LEBIH INFORMATIF dari sekadar menggabung teks
+5. Jika hanya ada 1-2 fakta untuk satu topik, TETAP buat insight
+6. Fakta yang tidak bisa dikelompokkan, ABAIKAN
+
+Output HANYA JSON array. Jika tidak ada yang bisa dikelompokkan, jawab []."""
 
     try:
         response = ollama.chat(model=MODEL, messages=[
