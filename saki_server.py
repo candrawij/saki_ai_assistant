@@ -20,7 +20,7 @@ load_dotenv()
 
 # Import modul Saki
 from saki_database import (
-    init_db, simpan_chat, simpan_fakta, lihat_semua_fakta, lihat_fakta_by_id,
+    LOGS_FOLDER, init_db, simpan_chat, simpan_fakta, lihat_semua_fakta, lihat_fakta_by_id,
     edit_fakta, hapus_fakta, cek_fakta_duplikat, update_importance,
     lihat_semua_reflections, lihat_reflection_by_id, hapus_reflection,
     edit_reflection, get_reflection_stats,
@@ -39,13 +39,17 @@ from saki_files import (
 )
 
 # ========== SETUP LOGGING ==========
+
+LOGS_FOLDER = Path(os.getenv("LOGS_FOLDER", "logs"))
+
 def setup_logging():
     logger = logging.getLogger("saki")
     if logger.handlers:
         return logger
     
     logger.setLevel(logging.DEBUG)
-    log_dir = Path("logs")
+    log_dir = LOGS_FOLDER
+
     log_dir.mkdir(exist_ok=True)
     
     console_handler = logging.StreamHandler()
@@ -73,10 +77,19 @@ logger = setup_logging()
 
 # ========== KONFIGURASI UI ==========
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "saki2024")
-SAVE_FOLDER = os.getenv("SAVE_FOLDER", "ringkasan")
-EXPORT_FOLDER = os.getenv("EXPORT_FOLDER", "exports")
-DOCUMENTS_FOLDER = os.getenv("DOCUMENTS_FOLDER", "documents")
+
+# Path sama dengan yang di saki_database.py
+DATA_FOLDER = Path(os.getenv("DATA_FOLDER", "data"))
+
+
+DATA_FOLDER = Path(os.getenv("DATA_FOLDER", "data"))
+DOCUMENTS_FOLDER = str(DATA_FOLDER / os.getenv("DOCUMENTS_FOLDER", "documents"))
+EXPORT_FOLDER = str(DATA_FOLDER / os.getenv("EXPORT_FOLDER", "exports"))
+SAVE_FOLDER = str(DATA_FOLDER / os.getenv("SAVE_FOLDER", "ringkasan"))
+CHROMA_FOLDER = str(DATA_FOLDER / os.getenv("CHROMA_FOLDER", "chroma_db"))
+
 DAYS_UNUSED_WARNING = 30
+
 
 st.set_page_config(page_title=f"{NAMA_AI} - AI Pribadi", page_icon="🤖", layout="wide")
 
@@ -592,10 +605,11 @@ if st.session_state.authenticated:
         col1, col2 = st.columns(2)
         with col1:
             st.info(f"**Model AI:** {MODEL}")
-            st.info(f"**Database:** saki_memory.db")
+            st.info(f"**Database:** data/saki_memory.db")
         with col2:
-            st.info(f"**Dokumen:** {DOCUMENTS_FOLDER}/")
-            st.info(f"**ChromaDB:** chroma_db/")
+            st.info(f"**Dokumen:** data/documents/")
+            st.info(f"**ChromaDB:** data/{os.getenv('CHROMA_FOLDER', 'chroma_db')}/")
+
         
         st.divider()
         

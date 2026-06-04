@@ -17,9 +17,24 @@ from chromadb.utils import embedding_functions
 logger = logging.getLogger("saki")
 
 # ========== KONFIGURASI DATABASE ==========
-DB_FILE = os.getenv("DB_PATH", "saki_memory.db")
-CHROMA_FOLDER = os.getenv("CHROMA_FOLDER", "chroma_db")
-DOCUMENTS_FOLDER = os.getenv("DOCUMENTS_FOLDER", "documents")
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+# Base folder untuk semua data
+DATA_FOLDER = Path(os.getenv("DATA_FOLDER", "data"))
+
+# Pastikan folder data ada
+DATA_FOLDER.mkdir(exist_ok=True)
+
+DB_FILE = str(DATA_FOLDER / os.getenv("DB_NAME", "saki_memory.db"))
+CHROMA_FOLDER = str(DATA_FOLDER / os.getenv("CHROMA_FOLDER", "chroma_db"))
+DOCUMENTS_FOLDER = str(DATA_FOLDER / os.getenv("DOCUMENTS_FOLDER", "documents"))
+EXPORT_FOLDER = str(DATA_FOLDER / os.getenv("EXPORT_FOLDER", "exports"))
+SAVE_FOLDER = str(DATA_FOLDER / os.getenv("SAVE_FOLDER", "ringkasan"))
+LOGS_FOLDER = Path(os.getenv("LOGS_FOLDER", "logs"))
+
 
 # ========== KONSTANTA ==========
 MAX_CONTENT_LENGTH = 10000
