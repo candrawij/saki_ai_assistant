@@ -9,7 +9,7 @@ import os
 import datetime
 import logging
 from contextlib import contextmanager
-from typing import Optional, Tuple, List, Generator
+from typing import Optional, Tuple, List, Generator, Dict
 from pathlib import Path
 import chromadb
 from chromadb.utils import embedding_functions
@@ -437,6 +437,47 @@ def get_facts_for_timeline() -> List[Tuple]:
     except Exception as e:
         logger.error(f"Failed to fetch timeline facts: {str(e)}", exc_info=True)
         return []
+    
+def get_chat_history_for_timeline() -> List[Tuple]:
+    """Ambil ringkasan chat per hari untuk timeline."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT DATE(timestamp) as chat_date, 
+                       COUNT(*) as message_count,
+                       GROUP_CONCAT(DISTINCT substr(content, 1, 100)) as previews
+                FROM conversations 
+                GROUP BY DATE(timestamp) 
+                ORDER BY chat_date ASC
+            """)
+            return c.fetchall()
+    except Exception as e:
+        logger.error(f"Failed to fetch chat history for timeline: {str(e)}", exc_info=True)
+        return []
+
+def get_reflections_for_timeline() -> List[Tuple]:
+    """Ambil insight per bulan untuk timeline."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT id, title, content, category, created_at 
+                FROM reflections 
+                ORDER BY created_at ASC
+            """)
+            return c.fetchall()
+    except Exception as e:
+        logger.error(f"Failed to fetch reflections for timeline: {str(e)}", exc_info=True)
+        return []
+
+def get_all_timeline_data() -> Dict:
+    """Ambil semua data untuk timeline: fakta, insight, chat."""
+    return {
+        "facts": get_facts_for_timeline(),
+        "reflections": get_reflections_for_timeline(),
+        "chats": get_chat_history_for_timeline()
+    }
 
 # ========== CHROMA DB ==========
 def init_chroma():

@@ -340,32 +340,150 @@ def save_reflections(insights: List[Dict]) -> int:
     logger.info(f"Saved {saved} reflections")
     return saved
 
-# ========== TIMELINE (V5.5 PREVIEW) ==========
+# ========== TIMELINE (V5.5) ==========
 def generate_timeline() -> List[Dict]:
-    """Generate timeline dari fakta."""
-    fakta = get_facts_for_timeline()
-    if not fakta:
-        return []
-    
-    # Kelompokkan per bulan
+    """Generate timeline 3 level: bulan → minggu → hari."""
+    from saki_database import get_all_timeline_data
     from collections import defaultdict
     import datetime
+    import calendar
     
-    timeline = defaultdict(list)
-    for f in fakta:
+    data = get_all_timeline_data()
+    all_facts = data["facts"]
+    all_reflections = data["reflections"]
+    all_chats = data["chats"]
+    
+    if not all_facts and not all_reflections and not all_chats:
+        return []
+    
+    # Organize data by date
+    daily_data = defaultdict(lambda: {"facts": [], "insights": [], "chat_count": 0})
+    
+    for f in all_facts:
         try:
             dt = datetime.datetime.strptime(f[3], "%Y-%m-%d %H:%M:%S")
-            key = dt.strftime("%B %Y")
-            timeline[key].append(f)
+            date_key = dt.strftime("%Y-%m-%d")
+            daily_data[date_key]["facts"].append({
+                "id": f[0], "category": f[1], "content": f[2]
+            })
         except:
             continue
     
+    for r in all_reflections:
+        try:
+            dt = datetime.datetime.strptime(r[4], "%Y-%m-%d %H:%M:%S")
+            date_key = dt.strftime("%Y-%m-%d")
+            daily_data[date_key]["insights"].append({
+                "id": r[0], "title": r[1], "content": r[2], "category": r[3]
+            })
+        except:
+            continue
+    
+    for c in all_chats:
+        try:
+            date_key = c[0]  # Already a date string
+            daily_data[date_key]["chat_count"] = c[1]
+        except:
+            continue
+    
+    # Group into weeks and months
+    months = defaultdict(lambda: {"weeks": defaultdict(lambda: {"days": {}}), "total_items": 0})
+    
+    for date_str in sorted(daily_data.keys()):
+        dt = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+        month_key = dt.strftime("%Y-%m")
+        month_name = dt.strftime("%B %Y")
+        
+        # Calculate week number within month
+        first_day = dt.replace(day=1)
+        week_num = ((dt - first_day).days // 7) + 1
+        week_label = f"Minggu {week_num}"
+        
+        day_data = daily_data[date_str]
+        items_count = len(day_data["facts"]) + len(day_data["insights"]) + (1 if day_data["chat_count"] > 0 else 0)
+        
+        months[month_key]["name"] = month_name
+        months[month_key]["year"] = dt.year
+        months[month_key]["month_num"] = dt.month
+        months[month_key]["total_items"] += items_count
+        months[month_key]["weeks"][week_label]["days"][dt.day] = {
+            "date": date_str,
+            "day_name": dt.strftime("%A"),
+            **day_data
+        }
+    
+    # Build result structure
     result = []
-    for month, facts in sorted(timeline.items()):
+    for month_key in sorted(months.keys()):
+        month_data = months[month_key]
+        
+        # Build weeks list
+        weeks_list = []
+        for week_label in sorted(month_data["weeks"].keys()):
+            week_data = month_data["weeks"][week_label]
+            days_list = []
+            for day_num in sorted(week_data["days"].keys()):
+                days_list.append(week_data["days"][day_num])
+            
+            weeks_list.append({
+                "label": week_label,
+                "days": days_list,
+                "total_items": sum(
+                    len(d["facts"]) + len(d["insights"]) + (1 if d["chat_count"] > 0 else 0)
+                    for d in days_list
+                )
+            })
+        
         result.append({
-            "month": month,
-            "facts": [{"id": f[0], "category": f[1], "content": f[2]} for f in facts],
-            "count": len(facts)
+            "year": month_data["year"],
+            "month": month_data["name"].split()[0],
+            "month_name": month_data["name"],
+            "total_items": month_data["total_items"],
+            "summary": None,  # Will be filled by AI later
+            "weeks": weeks_list
         })
     
     return result
+
+
+def generate_timeline_summary(month_name: str, items: List[Dict]) -> str:
+    """Generate AI summary untuk satu bulan."""
+    if not items:
+        return "Tidak ada aktivitas."
+    
+    # Build context from items
+    facts_text = []
+    insights_text = []
+    
+    for week in items:
+        for day in week.get("days", []):
+            for f in day.get("facts", []):
+                facts_text.append(f"- [{f['category']}] {f['content'][:100]}")
+            for ins in day.get("insights", []):
+                insights_text.append(f"- [{ins['category']}] {ins['title']}: {ins['content'][:100]}")
+    
+    context = ""
+    if facts_text:
+        context += "FAKTA:\n" + "\n".join(facts_text[:20]) + "\n\n"
+    if insights_text:
+        context += "INSIGHT:\n" + "\n".join(insights_text[:10])
+    
+    if not context.strip():
+        return "Aktivitas ringan."
+    
+    prompt = f"""Ringkas aktivitas user selama {month_name} dalam 1-2 kalimat Bahasa Indonesia.
+Fokus ke topik utama dan perkembangan penting.
+
+{context}
+
+Ringkasan:"""
+
+    try:
+        response = ollama.chat(model=MODEL, messages=[
+            {"role": "system", "content": "Kamu adalah asisten yang merangkum aktivitas bulanan. Jawab dalam 1-2 kalimat Bahasa Indonesia yang natural."},
+            {"role": "user", "content": prompt}
+        ])
+        return response["message"]["content"].strip()
+    except Exception as e:
+        logger.error(f"Timeline summary failed: {str(e)}", exc_info=True)
+        return f"Bulan ini: {len(facts_text)} fakta, {len(insights_text)} insight."

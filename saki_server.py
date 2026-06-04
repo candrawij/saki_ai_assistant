@@ -182,16 +182,143 @@ if st.session_state.authenticated:
                         f.write(f"{hasil}\n\n=== TEKS ASLI ===\n{teks[:1000]}...")
                     st.success(f"💾 Tersimpan: `{filepath}`")
         
-        with tab2:
-            uploaded = st.file_uploader("Upload file", type=["pdf", "docx", "txt", "md"])
-            if uploaded and st.button("Upload & Ringkas"):
-                with st.spinner("Memproses..."):
-                    doc_id, ringkasan = proses_upload(uploaded)
-                    if doc_id:
-                        st.success(f"Berhasil! ID: #{doc_id}")
-                        st.markdown(ringkasan)
+                with tab2:
+                    st.subheader("📅 Timeline Aktivitas")
+                    
+                    # Level selector
+                    view_level = st.radio(
+                        "Tampilan:",
+                        ["📅 Bulanan", "📆 Mingguan", "📋 Harian"],
+                        horizontal=True
+                    )
+                    
+                    timeline = generate_timeline()
+                    
+                    if not timeline:
+                        st.info("Belum ada data timeline.")
                     else:
-                        st.error(ringkasan)
+                        # BULANAN
+                        if view_level == "📅 Bulanan":
+                            for month_entry in timeline:
+                                # Generate summary if not cached
+                                if month_entry["summary"] is None and month_entry["total_items"] >= 3:
+                                    with st.spinner(f"Meringkas {month_entry['month_name']}..."):
+                                        month_entry["summary"] = generate_timeline_summary(
+                                            month_entry["month_name"],
+                                            month_entry["weeks"]
+                                        )
+                                
+                                with st.expander(
+                                    f"📅 {month_entry['month_name']} ({month_entry['total_items']} aktivitas)"
+                                ):
+                                    # AI Summary
+                                    if month_entry["summary"]:
+                                        st.info(f"💡 {month_entry['summary']}")
+                                    
+                                    # Highlight insights
+                                    insights_this_month = []
+                                    for week in month_entry["weeks"]:
+                                        for day in week["days"]:
+                                            for ins in day.get("insights", []):
+                                                insights_this_month.append(ins)
+                                    
+                                    if insights_this_month:
+                                        st.write("**🔍 Insight bulan ini:**")
+                                        for ins in insights_this_month[:3]:
+                                            st.write(f"- [{ins['category']}] {ins['title']}")
+                                    
+                                    # Per minggu
+                                    st.write("**📆 Per Minggu:**")
+                                    for week in month_entry["weeks"]:
+                                        st.write(
+                                            f"- {week['label']}: "
+                                            f"{week['total_items']} aktivitas, "
+                                            f"{len(week['days'])} hari aktif"
+                                        )
+                                    
+                                    # Stats
+                                    total_facts = sum(
+                                        len(d["facts"]) 
+                                        for w in month_entry["weeks"] 
+                                        for d in w["days"]
+                                    )
+                                    total_insights = sum(
+                                        len(d["insights"]) 
+                                        for w in month_entry["weeks"] 
+                                        for d in w["days"]
+                                    )
+                                    st.caption(f"📊 {total_facts} fakta | 💡 {total_insights} insight")
+                        
+                        # MINGGUAN
+                        elif view_level == "📆 Mingguan":
+                            all_weeks = []
+                            for month_entry in timeline:
+                                for week in month_entry["weeks"]:
+                                    all_weeks.append({
+                                        "label": f"{week['label']} - {month_entry['month_name']}",
+                                        "data": week,
+                                        "month": month_entry
+                                    })
+                            
+                            for week_entry in all_weeks:
+                                week = week_entry["data"]
+                                if week["total_items"] > 0:
+                                    with st.expander(
+                                        f"📆 {week_entry['label']} ({week['total_items']} aktivitas)"
+                                    ):
+                                        for day in week["days"]:
+                                            day_items = len(day["facts"]) + len(day["insights"])
+                                            chat_info = f" | 💬 {day['chat_count']} chat" if day["chat_count"] > 0 else ""
+                                            st.write(
+                                                f"**{day['day_name']}, {day['date']}**: "
+                                                f"{day_items} item{chat_info}"
+                                            )
+                                            
+                                            for f in day["facts"]:
+                                                st.write(f"  📝 [#{f['id']}] [{f['category']}] {f['content'][:80]}")
+                                            for ins in day["insights"]:
+                                                st.write(f"  💡 [#{ins['id']}] [{ins['category']}] {ins['title']}")
+                        
+                        # HARIAN
+                        elif view_level == "📋 Harian":
+                            # Build all days list
+                            all_days = []
+                            for month_entry in timeline:
+                                for week in month_entry["weeks"]:
+                                    for day in week["days"]:
+                                        all_days.append({
+                                            "date": day["date"],
+                                            "day_name": day["day_name"],
+                                            "data": day,
+                                            "month": month_entry["month_name"]
+                                        })
+                            
+                            # Sort by date descending
+                            all_days.sort(key=lambda x: x["date"], reverse=True)
+                            
+                            # Show last 30 days
+                            for day_entry in all_days[:30]:
+                                day = day_entry["data"]
+                                total = len(day["facts"]) + len(day["insights"]) + (1 if day["chat_count"] > 0 else 0)
+                                
+                                if total > 0:
+                                    with st.expander(
+                                        f"📋 {day_entry['day_name']}, {day_entry['date']} "
+                                        f"({day_entry['month']}) — {total} item"
+                                    ):
+                                        if day["chat_count"] > 0:
+                                            st.write(f"💬 {day['chat_count']} pesan chat")
+                                        
+                                        if day["facts"]:
+                                            st.write("**📝 Fakta:**")
+                                            for f in day["facts"]:
+                                                st.write(f"- [#{f['id']}] [{f['category']}] {f['content'][:100]}")
+                                        
+                                        if day["insights"]:
+                                            st.write("**💡 Insight:**")
+                                            for ins in day["insights"]:
+                                                st.write(f"- [#{ins['id']}] [{ins['category']}] {ins['title']}")
+                                                st.write(f"  {ins['content'][:150]}")
     
     # ===== MEMORY =====
     elif menu == "📚 Memory":
