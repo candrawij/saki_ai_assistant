@@ -34,6 +34,9 @@ from saki_ai import (
     merge_fakta_dengan_ai, deteksi_duplikat_semantik,
     generate_reflection, save_reflections, generate_timeline
 )
+from saki_files import (
+    ekstrak_teks_dari_pdf, ekstrak_teks_dari_docx, ekstrak_teks_dari_txt, proses_upload
+)
 
 # ========== SETUP LOGGING ==========
 def setup_logging():
