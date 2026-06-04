@@ -14,7 +14,7 @@ logger = logging.getLogger("saki")
 # ========== KONFIGURASI ==========
 MODEL = "qwen3:4b"
 NAMA_AI = "Saki"
-AUTO_EXTRACT_THRESHOLD = 0.75
+AUTO_EXTRACT_THRESHOLD = 0.65
 SUMMARY_MAX_LENGTH = 4000
 MIN_CONFIDENCE_THRESHOLD = 0.5
 MIN_IMPORTANCE_FOR_TRACKING = 5
@@ -131,12 +131,28 @@ Jika ragu, pilih false."""
         
         data = json.loads(hasil)
         
+        # Debug: log hasil AI
+        logger.debug(f"Auto-extract raw response: {hasil[:200]}")
+        logger.debug(f"Auto-extract parsed: is_fact={data.get('is_fact')}, confidence={data.get('confidence')}")
+        
         if data.get("is_fact") and data.get("confidence", 0) >= AUTO_EXTRACT_THRESHOLD:
+            logger.info(f"Auto-extract ACCEPTED: [{data.get('category')}] {data.get('fact')} (conf={data.get('confidence')})")
             return {
                 "fact": data["fact"],
                 "category": data.get("category", "umum"),
                 "confidence": data["confidence"]
             }
+        
+        # Log kenapa ditolak
+        if data.get("is_fact"):
+            logger.debug(f"Auto-extract REJECTED: confidence {data.get('confidence')} < threshold {AUTO_EXTRACT_THRESHOLD}")
+        else:
+            logger.debug(f"Auto-extract REJECTED: is_fact=False for '{pesan_user[:50]}...'")
+        
+        return None
+        
+    except json.JSONDecodeError as e:
+        logger.warning(f"Auto-extract JSON parse failed: {str(e)} | raw: {hasil[:100] if 'hasil' in locals() else 'N/A'}")
         return None
     except Exception as e:
         logger.error(f"Auto-extract failed: {type(e).__name__}: {str(e)}", exc_info=True)
