@@ -20,7 +20,7 @@ load_dotenv()
 
 # Import modul Saki
 from saki_database import (
-    LOGS_FOLDER, init_db, simpan_chat, simpan_fakta, lihat_semua_fakta, lihat_fakta_by_id,
+    init_db, simpan_chat, simpan_fakta, lihat_semua_fakta, lihat_fakta_by_id,
     edit_fakta, hapus_fakta, cek_fakta_duplikat, update_importance,
     lihat_semua_reflections, lihat_reflection_by_id, hapus_reflection,
     edit_reflection, get_reflection_stats,
@@ -77,10 +77,6 @@ logger = setup_logging()
 
 # ========== KONFIGURASI UI ==========
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "saki2024")
-
-# Path sama dengan yang di saki_database.py
-DATA_FOLDER = Path(os.getenv("DATA_FOLDER", "data"))
-
 
 DATA_FOLDER = Path(os.getenv("DATA_FOLDER", "data"))
 DOCUMENTS_FOLDER = str(DATA_FOLDER / os.getenv("DOCUMENTS_FOLDER", "documents"))
@@ -190,7 +186,6 @@ if st.session_state.authenticated:
             uploaded = st.file_uploader("Upload file", type=["pdf", "docx", "txt", "md"])
             if uploaded and st.button("Upload & Ringkas"):
                 with st.spinner("Memproses..."):
-                    from saki_files import proses_upload
                     doc_id, ringkasan = proses_upload(uploaded)
                     if doc_id:
                         st.success(f"Berhasil! ID: #{doc_id}")
@@ -267,7 +262,6 @@ if st.session_state.authenticated:
             uploaded = st.file_uploader("Upload dokumen", type=["pdf", "docx", "txt", "md"], key="doc_upload")
             if uploaded and st.button("Upload"):
                 with st.spinner("Memproses dokumen..."):
-                    from saki_files import proses_upload
                     doc_id, ringkasan = proses_upload(uploaded)
                     if doc_id:
                         st.success(f"Berhasil! ID: #{doc_id}")
