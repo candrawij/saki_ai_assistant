@@ -524,3 +524,87 @@ def cari_dokumen_semantik(query: str, n_results: int = 3) -> List[Tuple]:
     except Exception as e:
         logger.error(f"Semantic search failed: {str(e)}", exc_info=True)
         return []
+    
+def get_daily_stats(date_str: str = None) -> Dict:
+    """Statistik harian: fakta baru, insight baru, chat count."""
+    if date_str is None:
+        date_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            
+            # Fakta baru hari ini
+            c.execute("SELECT COUNT(*) FROM facts WHERE DATE(created_at) = ? AND deleted = 0", (date_str,))
+            new_facts = c.fetchone()[0]
+            
+            # Insight baru hari ini
+            c.execute("SELECT COUNT(*) FROM reflections WHERE DATE(created_at) = ?", (date_str,))
+            new_insights = c.fetchone()[0]
+            
+            # Chat hari ini
+            c.execute("SELECT COUNT(*) FROM conversations WHERE DATE(timestamp) = ?", (date_str,))
+            chat_count = c.fetchone()[0]
+            
+            # Total fakta
+            c.execute("SELECT COUNT(*) FROM facts WHERE deleted = 0")
+            total_facts = c.fetchone()[0]
+            
+            # Total insight
+            c.execute("SELECT COUNT(*) FROM reflections")
+            total_insights = c.fetchone()[0]
+            
+        return {
+            "date": date_str,
+            "new_facts": new_facts,
+            "new_insights": new_insights,
+            "chat_count": chat_count,
+            "total_facts": total_facts,
+            "total_insights": total_insights
+        }
+    except Exception as e:
+        logger.error(f"Failed to get daily stats: {str(e)}", exc_info=True)
+        return {}
+
+def get_weekly_stats() -> Dict:
+    """Statistik mingguan."""
+    today = datetime.datetime.now()
+    week_start = (today - datetime.timedelta(days=today.weekday())).strftime("%Y-%m-%d")
+    
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            
+            # Fakta minggu ini
+            c.execute("SELECT COUNT(*) FROM facts WHERE DATE(created_at) >= ? AND deleted = 0", (week_start,))
+            week_facts = c.fetchone()[0]
+            
+            # Insight minggu ini
+            c.execute("SELECT COUNT(*) FROM reflections WHERE DATE(created_at) >= ?", (week_start,))
+            week_insights = c.fetchone()[0]
+            
+            # Chat minggu ini
+            c.execute("SELECT COUNT(*) FROM conversations WHERE DATE(timestamp) >= ?", (week_start,))
+            week_chats = c.fetchone()[0]
+            
+            # Top categories
+            c.execute("""
+                SELECT category, COUNT(*) as cnt 
+                FROM facts 
+                WHERE DATE(created_at) >= ? AND deleted = 0 
+                GROUP BY category 
+                ORDER BY cnt DESC 
+                LIMIT 5
+            """, (week_start,))
+            top_categories = c.fetchall()
+            
+        return {
+            "week_start": week_start,
+            "week_facts": week_facts,
+            "week_insights": week_insights,
+            "week_chats": week_chats,
+            "top_categories": top_categories
+        }
+    except Exception as e:
+        logger.error(f"Failed to get weekly stats: {str(e)}", exc_info=True)
+        return {}

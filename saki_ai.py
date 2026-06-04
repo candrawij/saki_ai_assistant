@@ -503,3 +503,61 @@ Ringkasan:"""
     except Exception as e:
         logger.error(f"Timeline summary failed: {str(e)}", exc_info=True)
         return f"Bulan ini: {len(facts_text)} fakta, {len(insights_text)} insight."
+    
+def generate_morning_greeting() -> str:
+    """Generate sapaan pagi dengan rekap kemarin."""
+    from saki_database import get_daily_stats
+    import datetime
+    
+    yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    stats = get_daily_stats(yesterday)
+    today_stats = get_daily_stats()
+    
+    hour = datetime.datetime.now().hour
+    if hour < 11:
+        greeting = "Selamat pagi"
+    elif hour < 15:
+        greeting = "Selamat siang"
+    elif hour < 19:
+        greeting = "Selamat sore"
+    else:
+        greeting = "Selamat malam"
+    
+    parts = [f"{greeting}!"]
+    
+    if stats.get("new_facts", 0) > 0 or stats.get("new_insights", 0) > 0:
+        parts.append(f"Kemarin: {stats['new_facts']} fakta baru, {stats['new_insights']} insight baru, {stats['chat_count']} chat.")
+    
+    parts.append(f"Total: {stats.get('total_facts', 0)} fakta, {stats.get('total_insights', 0)} insight.")
+    
+    return " ".join(parts)
+
+
+def generate_weekly_summary() -> str:
+    """Generate ringkasan mingguan dengan AI."""
+    from saki_database import get_weekly_stats
+    
+    stats = get_weekly_stats()
+    
+    if stats.get("week_facts", 0) == 0:
+        return "Minggu ini belum ada aktivitas."
+    
+    prompt = f"""Buat ringkasan mingguan dalam 2-3 kalimat Bahasa Indonesia.
+
+Statistik minggu ini:
+- {stats['week_facts']} fakta baru
+- {stats['week_insights']} insight baru
+- {stats['week_chats']} chat
+- Kategori terbanyak: {', '.join([f'{c[0]} ({c[1]})' for c in stats.get('top_categories', [])])}
+
+Ringkasan:"""
+
+    try:
+        response = ollama.chat(model=MODEL, messages=[
+            {"role": "system", "content": "Kamu merangkum aktivitas mingguan. Jawab 2-3 kalimat natural."},
+            {"role": "user", "content": prompt}
+        ])
+        return response["message"]["content"].strip()
+    except Exception as e:
+        logger.error(f"Weekly summary failed: {str(e)}", exc_info=True)
+        return f"Minggu ini: {stats['week_facts']} fakta, {stats['week_insights']} insight, {stats['week_chats']} chat."

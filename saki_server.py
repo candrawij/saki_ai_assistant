@@ -1,6 +1,6 @@
 """
 Saki Server - Streamlit UI
-AI Pribadi v5.0 — Reflection Engine
+AI Pribadi v6.0 — Reflection Engine
 """
 
 import streamlit as st
@@ -25,14 +25,15 @@ from saki_database import (
     lihat_semua_reflections, lihat_reflection_by_id, hapus_reflection,
     edit_reflection, get_reflection_stats,
     lihat_semua_dokumen, lihat_dokumen_by_id, hapus_dokumen,
-    simpan_dokumen, tambah_ke_chroma, cari_dokumen_semantik,
+    simpan_dokumen, tambah_ke_chroma, cari_dokumen_semantik, get_daily_stats, get_weekly_stats,
     init_chroma, get_db
 )
 from saki_ai import (
     NAMA_AI, MODEL, SYSTEM_PROMPT, SUMMARY_MAX_LENGTH,
     ringkas_teks, chat_saki, auto_ekstrak_fakta, auto_rate_importance,
     merge_fakta_dengan_ai, deteksi_duplikat_semantik,
-    generate_reflection, save_reflections, generate_timeline, generate_timeline_summary
+    generate_reflection, save_reflections, generate_timeline, generate_timeline_summary,
+    generate_morning_greeting, generate_weekly_summary
 )
 from saki_files import (
     ekstrak_teks_dari_pdf, ekstrak_teks_dari_docx, ekstrak_teks_dari_txt, proses_upload
@@ -107,12 +108,12 @@ with st.sidebar:
                 st.error("Password salah!")
         st.stop()
     else:
-        st.title(f"🤖 {NAMA_AI} v5.0")
+        st.title(f"🤖 {NAMA_AI} v6.0")
         st.caption("AI Pribadi — Reflection Engine")
         
         menu = st.radio("Menu", [
             "💬 Chat", "📝 Ringkasan", "📚 Memory", "📄 Dokumen",
-            "🧠 Intelligence", "🧠 Reflection", "⚙️ Pengaturan"
+            "🧠 Intelligence", "🧠 Reflection", "📊 Daily Recap", "⚙️ Pengaturan"
         ])
         
         if st.button("🚪 Logout"):
@@ -127,7 +128,7 @@ if st.session_state.authenticated:
     # Startup log sekali saja
     if "startup_logged" not in st.session_state:
         logger.info("=" * 50)
-        logger.info(f"Saki v5.0 starting — Reflection Engine")
+        logger.info(f"Saki v6.0 starting — Reflection Engine")
         logger.info(f"Model: {MODEL}")
         logger.info("=" * 50)
         st.session_state.startup_logged = True
@@ -136,6 +137,17 @@ if st.session_state.authenticated:
     if menu == "💬 Chat":
         st.title("💬 Chat dengan Saki")
         st.caption("Saki otomatis mencatat fakta penting 🤖")
+
+        # V6: Sapaan pagi (muncul sekali per sesi)
+        if "greeting_shown" not in st.session_state:
+            st.session_state.greeting_shown = False
+        
+        if not st.session_state.greeting_shown:
+            greeting = generate_morning_greeting()
+            st.info(f"👋 {greeting}")
+            if st.button("✕", key="dismiss_greeting"):
+                st.session_state.greeting_shown = True
+                st.rerun()
         
         for msg in st.session_state.chat_history:
             with st.chat_message(msg["role"]):
@@ -716,6 +728,78 @@ if st.session_state.authenticated:
                                         st.write(f"- [#{ins['id']}] [{ins['category']}] {ins['title']}")
                                         st.write(f"  {ins['content'][:150]}")
 
+    # ===== DAILY RECAP (V6) =====
+    elif menu == "📊 Daily Recap":
+        st.title("📊 Daily Recap")
+        st.caption("Aktivitas harian & mingguan Anda bersama Saki")
+        
+        tab1, tab2 = st.tabs(["📅 Harian", "📆 Mingguan"])
+        
+        with tab1:
+            today = datetime.datetime.now().strftime("%Y-%m-%d")
+            yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader(f"📅 Hari Ini ({today})")
+                today_stats = get_daily_stats(today)
+                
+                st.metric("💬 Chat", today_stats.get("chat_count", 0))
+                st.metric("📝 Fakta Baru", today_stats.get("new_facts", 0))
+                st.metric("💡 Insight Baru", today_stats.get("new_insights", 0))
+            
+            with col2:
+                st.subheader(f"📅 Kemarin ({yesterday})")
+                yesterday_stats = get_daily_stats(yesterday)
+                
+                st.metric("💬 Chat", yesterday_stats.get("chat_count", 0))
+                st.metric("📝 Fakta Baru", yesterday_stats.get("new_facts", 0))
+                st.metric("💡 Insight Baru", yesterday_stats.get("new_insights", 0))
+            
+            st.divider()
+            
+            st.subheader("📊 Total Keseluruhan")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Fakta", today_stats.get("total_facts", 0))
+            with col2:
+                st.metric("Total Insight", today_stats.get("total_insights", 0))
+            with col3:
+                st.metric("Total Dokumen", len(lihat_semua_dokumen()))
+        
+        with tab2:
+            st.subheader("📆 Ringkasan Mingguan")
+            
+            weekly_stats = get_weekly_stats()
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Fakta Minggu Ini", weekly_stats.get("week_facts", 0))
+            with col2:
+                st.metric("Insight Minggu Ini", weekly_stats.get("week_insights", 0))
+            with col3:
+                st.metric("Chat Minggu Ini", weekly_stats.get("week_chats", 0))
+            
+            st.divider()
+            
+            # Weekly AI Summary
+            st.subheader("💡 Ringkasan AI")
+            if st.button("🔄 Generate Weekly Summary"):
+                with st.spinner("Menganalisis minggu ini..."):
+                    summary = generate_weekly_summary()
+                    st.success(summary)
+            
+            st.divider()
+            
+            # Top categories
+            st.subheader("🔥 Kategori Terbanyak Minggu Ini")
+            if weekly_stats.get("top_categories"):
+                for cat, count in weekly_stats["top_categories"]:
+                    st.write(f"- **{cat}**: {count} fakta")
+            else:
+                st.info("Belum ada data minggu ini.")
+
     # ===== PENGATURAN =====
     elif menu == "⚙️ Pengaturan":
         st.title("⚙️ Pengaturan")
@@ -835,8 +919,8 @@ if st.session_state.authenticated:
             st.metric("Insight", len(reflections))
         
         st.divider()
-        st.caption(f"🤖 {NAMA_AI} v5.0 — Reflection Engine | Streamlit + Ollama")
+        st.caption(f"🤖 {NAMA_AI} v6.0 — Reflection Engine | Streamlit + Ollama")
         
 # ========== FOOTER ==========
 st.sidebar.divider()
-st.sidebar.caption(f"🤖 {NAMA_AI} v5.0 — Reflection Engine")
+st.sidebar.caption(f"🤖 {NAMA_AI} v6.0 — Reflection Engine")
