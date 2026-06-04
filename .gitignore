@@ -32,3 +32,8 @@ Thumbs.db
 
 # Audit
 Audit/
+
+# Folder dan File Log
+log/
+logs/
+*.log
