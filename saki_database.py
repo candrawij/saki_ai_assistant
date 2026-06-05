@@ -13,6 +13,7 @@ from typing import Optional, Tuple, List, Generator, Dict
 from pathlib import Path
 import chromadb
 from chromadb.utils import embedding_functions
+import re
 
 logger = logging.getLogger("saki")
 
@@ -113,6 +114,17 @@ def init_db():
             FOREIGN KEY (source_id) REFERENCES facts(id),
             FOREIGN KEY (target_id) REFERENCES facts(id)
         )''')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS proactive_alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            alert_type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            priority TEXT DEFAULT 'medium',
+            status TEXT DEFAULT 'active',
+            related_fact_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            dismissed_at TIMESTAMP
+        )''')
         
         # Auto-migration
         c.execute("PRAGMA table_info(facts)")
@@ -124,7 +136,8 @@ def init_db():
             'importance': "INTEGER DEFAULT 5",
             'access_count': "INTEGER DEFAULT 0",
             'last_accessed': "TIMESTAMP DEFAULT NULL",
-            'reflected': "INTEGER DEFAULT 0"
+            'reflected': "INTEGER DEFAULT 0",
+            'status': "TEXT DEFAULT 'active'"
         }
         
         for col_name, col_def in migrations.items():
@@ -208,7 +221,7 @@ def lihat_semua_fakta() -> List[Tuple]:
     try:
         with get_db() as conn:
             c = conn.cursor()
-            c.execute("SELECT id, category, content, source, confidence, importance, access_count, last_accessed, created_at FROM facts WHERE deleted = 0 ORDER BY importance DESC, id DESC")
+            c.execute("SELECT id, category, content, source, confidence, importance, access_count, last_accessed, created_at, status FROM facts WHERE deleted = 0 ORDER BY importance DESC, id DESC")
             return c.fetchall()
     except Exception as e:
         logger.error(f"Failed to fetch facts: {str(e)}", exc_info=True)
@@ -219,7 +232,7 @@ def lihat_fakta_by_id(fact_id: int) -> Optional[Tuple]:
     try:
         with get_db() as conn:
             c = conn.cursor()
-            c.execute("SELECT id, category, content, source, confidence, importance, access_count, last_accessed, created_at FROM facts WHERE id = ? AND deleted = 0", (fact_id,))
+            c.execute("SELECT id, category, content, source, confidence, importance, access_count, last_accessed, created_at, status FROM facts WHERE id = ? AND deleted = 0", (fact_id,))
             return c.fetchone()
     except Exception as e:
         logger.error(f"Failed to fetch fact {fact_id}: {str(e)}", exc_info=True)
@@ -489,6 +502,155 @@ def get_all_timeline_data() -> Dict:
         "reflections": get_reflections_for_timeline(),
         "chats": get_chat_history_for_timeline()
     }
+
+# ========== PROACTIVE ASSISTANT (V8) ==========
+def cek_proyek_mengendap(hari: int = 30) -> List[Dict]:
+    """Cari fakta proyek yang tidak diakses > N hari."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT id, content, access_count, last_accessed, created_at
+                FROM facts 
+                WHERE deleted = 0 AND status = 'active' 
+                AND category IN ('proyek', 'pekerjaan', 'pendidikan')
+                ORDER BY last_accessed ASC
+            """)
+            rows = c.fetchall()
+
+            result = []
+            now = datetime.datetime.now()
+            for r in rows:
+                # Hitung days_since di Python
+                last = r[3] if r[3] else r[4]  # last_accessed atau created_at
+                if last:
+                    try:
+                        dt = datetime.datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+                        days = (now - dt).days
+                        if days > hari:
+                            result.append({
+                                "id": r[0], "content": r[1], "access_count": r[2],
+                                "last_accessed": r[3], "days": days
+                            })
+                    except:
+                        continue
+            return result
+
+    except Exception as e:
+        logger.error(f"Failed to check stale projects: {str(e)}", exc_info=True)
+        return []
+
+def cek_deadline_mendekat(hari: int = 14) -> List[Dict]:
+    """Cari fakta jadwal yang mendekat."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT id, content, created_at
+                FROM facts 
+                WHERE deleted = 0 AND status = 'active' 
+                AND category IN ('jadwal', 'deadline')
+            """)
+            rows = c.fetchall()
+            
+            result = []
+            for r in rows:
+                # Coba ekstrak tanggal dari konten
+                content = r[1]
+                # Cari pola tanggal (contoh: "30 Juni", "Juli 2026", "deadline 15/07")
+                # Untuk sekarang, cek fakta yang mengandung kata "deadline"
+                if 'deadline' in content.lower() or 'selesai' in content.lower():
+                    result.append({
+                        "id": r[0], "content": content, 
+                        "created_at": r[2], "days": 14  # Default 14 hari
+                    })
+            return result
+    except Exception as e:
+        logger.error(f"Failed to check deadlines: {str(e)}", exc_info=True)
+        return []
+
+def simpan_alert(alert_type: str, message: str, priority: str = "medium", related_fact_id: int = None) -> Optional[int]:
+    """Simpan alert proaktif."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            # Cek duplikat (alert sama yang masih active)
+            c.execute("SELECT id FROM proactive_alerts WHERE alert_type = ? AND related_fact_id = ? AND status = 'active'",
+                      (alert_type, related_fact_id))
+            if c.fetchone():
+                return None
+            
+            c.execute("INSERT INTO proactive_alerts (alert_type, message, priority, related_fact_id) VALUES (?, ?, ?, ?)",
+                      (alert_type, message, priority, related_fact_id))
+            conn.commit()
+            return c.lastrowid
+    except Exception as e:
+        logger.error(f"Failed to save alert: {str(e)}", exc_info=True)
+        return None
+
+def lihat_active_alerts() -> List[Dict]:
+    """Ambil alert yang masih active."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, alert_type, message, priority, related_fact_id, created_at FROM proactive_alerts WHERE status = 'active' ORDER BY priority DESC, created_at DESC")
+            rows = c.fetchall()
+            return [
+                {"id": r[0], "type": r[1], "message": r[2], "priority": r[3], 
+                 "fact_id": r[4], "created_at": r[5]}
+                for r in rows
+            ]
+    except Exception as e:
+        logger.error(f"Failed to fetch alerts: {str(e)}", exc_info=True)
+        return []
+
+def dismiss_alert(alert_id: int) -> bool:
+    """Tandai alert sebagai dismissed."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("UPDATE proactive_alerts SET status = 'dismissed', dismissed_at = CURRENT_TIMESTAMP WHERE id = ?", (alert_id,))
+            conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to dismiss alert {alert_id}: {str(e)}", exc_info=True)
+        return False
+
+def ignore_alert(alert_id: int) -> bool:
+    """Tandai alert sebagai ignored (permanen)."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("UPDATE proactive_alerts SET status = 'ignored', dismissed_at = CURRENT_TIMESTAMP WHERE id = ?", (alert_id,))
+            conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to ignore alert {alert_id}: {str(e)}", exc_info=True)
+        return False
+
+def update_fact_status(fact_id: int, status: str) -> bool:
+    """Update status fakta: 'active', 'done', 'archived'."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("UPDATE facts SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (status, fact_id))
+            conn.commit()
+        logger.info(f"Updated fact #{fact_id} status to '{status}'")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update fact status: {str(e)}", exc_info=True)
+        return False
+
+def get_tasks_by_status(status: str = 'active') -> List[Tuple]:
+    """Ambil fakta berdasarkan status."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, category, content, importance, created_at FROM facts WHERE deleted = 0 AND status = ? ORDER BY importance DESC", (status,))
+            return c.fetchall()
+    except Exception as e:
+        logger.error(f"Failed to fetch tasks: {str(e)}", exc_info=True)
+        return []
 
 # ========== CHROMA DB ==========
 def init_chroma():

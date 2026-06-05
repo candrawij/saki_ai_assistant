@@ -8,6 +8,7 @@ import json
 import re
 import logging
 from typing import Optional, List, Tuple, Dict
+import datetime
 
 logger = logging.getLogger("saki")
 
@@ -362,7 +363,6 @@ def generate_timeline() -> List[Dict]:
     from saki_database import get_all_timeline_data
     from collections import defaultdict
     import datetime
-    import calendar
     
     data = get_all_timeline_data()
     all_facts = data["facts"]
@@ -511,7 +511,6 @@ def generate_morning_greeting() -> str:
     
     yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     stats = get_daily_stats(yesterday)
-    today_stats = get_daily_stats()
     
     hour = datetime.datetime.now().hour
     if hour < 11:
@@ -532,35 +531,6 @@ def generate_morning_greeting() -> str:
     
     return " ".join(parts)
 
-
-def generate_weekly_summary() -> str:
-    """Generate ringkasan mingguan dengan AI."""
-    from saki_database import get_weekly_stats
-    
-    stats = get_weekly_stats()
-    
-    if stats.get("week_facts", 0) == 0:
-        return "Minggu ini belum ada aktivitas."
-    
-    prompt = f"""Buat ringkasan mingguan dalam 2-3 kalimat Bahasa Indonesia.
-
-Statistik minggu ini:
-- {stats['week_facts']} fakta baru
-- {stats['week_insights']} insight baru
-- {stats['week_chats']} chat
-- Kategori terbanyak: {', '.join([f'{c[0]} ({c[1]})' for c in stats.get('top_categories', [])])}
-
-Ringkasan:"""
-
-    try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Kamu merangkum aktivitas mingguan. Jawab 2-3 kalimat natural."},
-            {"role": "user", "content": prompt}
-        ])
-        return response["message"]["content"].strip()
-    except Exception as e:
-        logger.error(f"Weekly summary failed: {str(e)}", exc_info=True)
-        return f"Minggu ini: {stats['week_facts']} fakta, {stats['week_insights']} insight, {stats['week_chats']} chat."
 
 def extract_relationships() -> Tuple[int, str]:
     """
@@ -723,7 +693,6 @@ def generate_weekly_summary_v2() -> str:
         return "Minggu ini belum ada aktivitas."
     
     # Ambil fakta minggu ini
-    import datetime
     week_start = stats["week_start"]
     
     fakta_minggu_ini = []
@@ -762,6 +731,98 @@ Ringkasan:"""
         logger.error(f"Weekly summary v2 failed: {str(e)}", exc_info=True)
         return "Gagal membuat ringkasan."
 
+# ========== PROACTIVE ASSISTANT (V8) ==========
+def check_proactive_triggers() -> List[Dict]:
+    """Cek semua trigger proaktif. Return list of alerts."""
+    from saki_database import (
+        cek_proyek_mengendap, cek_deadline_mendekat, 
+        ambil_fakta_belum_reflected, simpan_alert, lihat_active_alerts
+    )
+    
+    alerts = []
+    
+    # 1. Proyek mengendap (>30 hari)
+    old_projects = cek_proyek_mengendap(30)
+    for p in old_projects:
+        msg = f"📌 Proyek '{p['content'][:80]}' sudah {p['days']} hari tidak dibahas. Masih aktif?"
+        simpan_alert("stale_project", msg, "medium", p["id"])
+    
+    # 2. Deadline mendekat
+    deadlines = cek_deadline_mendekat(14)
+    for d in deadlines:
+        msg = f"⏰ Deadline: '{d['content'][:80]}' — perlu action segera."
+        simpan_alert("upcoming_deadline", msg, "high", d["id"])
+    
+    # 3. Insight menunggu
+    unreflected = ambil_fakta_belum_reflected()
+    if len(unreflected) >= 10:
+        msg = f"💡 {len(unreflected)} fakta belum di-reflect. Generate insight sekarang?"
+        simpan_alert("insight_pending", msg, "low", None)
+    
+    return lihat_active_alerts()
+
+
+def generate_proactive_greeting() -> str:
+    """Generate sapaan pagi dengan info proaktif."""
+    from saki_database import get_daily_stats, lihat_active_alerts
+    import datetime
+    
+    yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    stats = get_daily_stats(yesterday)
+    alerts = lihat_active_alerts()
+    
+    hour = datetime.datetime.now().hour
+    if hour < 11:
+        greeting = "Selamat pagi"
+    elif hour < 15:
+        greeting = "Selamat siang"
+    elif hour < 19:
+        greeting = "Selamat sore"
+    else:
+        greeting = "Selamat malam"
+    
+    parts = [f"{greeting}!"]
+    
+    if stats.get("new_facts", 0) > 0 or stats.get("new_insights", 0) > 0:
+        parts.append(f"Kemarin: {stats['new_facts']} fakta, {stats['new_insights']} insight, {stats['chat_count']} chat.")
+    
+    # Tambah alert penting
+    high_alerts = [a for a in alerts if a["priority"] == "high"]
+    if high_alerts:
+        parts.append(f"⚠️ {len(high_alerts)} hal butuh perhatian.")
+    
+    total_alerts = len(alerts)
+    if total_alerts > 0:
+        parts.append(f"🔔 {total_alerts} notifikasi menunggu.")
+    
+    return " ".join(parts)
+
+
+def answer_task_query() -> str:
+    """Jawab pertanyaan seperti 'Apa tugas saya yang belum selesai?'"""
+    from saki_database import get_tasks_by_status
+    
+    active_tasks = get_tasks_by_status('active')
+    
+    if not active_tasks:
+        return "Tidak ada tugas aktif. Semua sudah selesai! 🎉"
+    
+    # Kelompokkan
+    tasks_by_cat = {}
+    for t in active_tasks:
+        cat = t[1]
+        if cat not in tasks_by_cat:
+            tasks_by_cat[cat] = []
+        tasks_by_cat[cat].append(t)
+    
+    parts = [f"Ada {len(active_tasks)} hal yang masih aktif:\n"]
+    
+    for cat, tasks in tasks_by_cat.items():
+        parts.append(f"\n**{cat.upper()}** ({len(tasks)}):")
+        for t in tasks[:5]:
+            parts.append(f"- [#{t[0]}] {t[2][:100]}")
+    
+    return "\n".join(parts)
 
 def generate_graph_summary(cluster_facts: List[str]) -> str:
     """Generate nama/deskripsi untuk satu cluster knowledge graph."""

@@ -1,6 +1,6 @@
 """
 Saki Server - Streamlit UI
-AI Pribadi v6.0 — Reflection Engine
+AI Pribadi v8.0 — Proactive Assistant
 """
 
 import streamlit as st
@@ -27,6 +27,8 @@ from saki_database import (
     lihat_semua_dokumen, lihat_dokumen_by_id, hapus_dokumen,
     simpan_dokumen, tambah_ke_chroma, cari_dokumen_semantik, get_daily_stats, get_weekly_stats,
     lihat_semua_relationships, hapus_relationship, hapus_semua_relationships,
+    cek_proyek_mengendap, cek_deadline_mendekat, lihat_active_alerts, dismiss_alert, ignore_alert,
+    update_fact_status, get_tasks_by_status, simpan_alert,
     init_chroma, get_db
 )
 from saki_ai import (
@@ -35,7 +37,8 @@ from saki_ai import (
     merge_fakta_dengan_ai, deteksi_duplikat_semantik,
     generate_reflection, save_reflections, generate_timeline, generate_timeline_summary,
     generate_morning_greeting, generate_weekly_summary, extract_relationships, build_knowledge_graph, 
-    generate_weekly_summary_v2, generate_graph_summary
+    generate_weekly_summary_v2, generate_graph_summary, check_proactive_triggers, generate_proactive_greeting,
+    answer_task_query
 )
 from saki_files import (
     ekstrak_teks_dari_pdf, ekstrak_teks_dari_docx, ekstrak_teks_dari_txt, proses_upload
@@ -110,8 +113,8 @@ with st.sidebar:
                 st.error("Password salah!")
         st.stop()
     else:
-        st.title(f"🤖 {NAMA_AI} v6.0")
-        st.caption("AI Pribadi — Reflection Engine")
+        st.title(f"🤖 {NAMA_AI} v8.0")
+        st.caption("AI Pribadi — Proactive Assistant")
         
         menu = st.radio("Menu", [
             "💬 Chat", "📝 Ringkasan", "📚 Memory", "📄 Dokumen",
@@ -131,7 +134,7 @@ if st.session_state.authenticated:
     # Startup log sekali saja
     if "startup_logged" not in st.session_state:
         logger.info("=" * 50)
-        logger.info(f"Saki v6.0 starting — Reflection Engine")
+        logger.info(f"Saki v8.0 starting — Proactive Assistant")
         logger.info(f"Model: {MODEL}")
         logger.info("=" * 50)
         st.session_state.startup_logged = True
@@ -146,12 +149,43 @@ if st.session_state.authenticated:
             st.session_state.greeting_shown = False
         
         if not st.session_state.greeting_shown:
-            greeting = generate_morning_greeting()
+            greeting = generate_proactive_greeting()
             st.info(f"👋 {greeting}")
             if st.button("✕", key="dismiss_greeting"):
                 st.session_state.greeting_shown = True
                 st.rerun()
+
+        # V8: Proactive Alerts
+        if "alerts_checked" not in st.session_state:
+            st.session_state.alerts_checked = False
         
+        # Cek trigger setiap buka halaman (sekali per sesi)
+        if not st.session_state.alerts_checked:
+            alerts = check_proactive_triggers()
+            st.session_state.alerts_checked = True
+        else:
+            alerts = lihat_active_alerts()
+        
+        if alerts:
+            with st.expander(f"🔔 {len(alerts)} Notifikasi", expanded=True):
+                for alert in alerts[:5]:
+                    priority_color = {"high": "🔴", "medium": "🟡", "low": "🔵"}
+                    pc = priority_color.get(alert["priority"], "⚪")
+                    
+                    col1, col2, col3 = st.columns([8, 1, 1])
+                    with col1:
+                        st.write(f"{pc} {alert['message']}")
+                    with col2:
+                        if st.button("✓", key=f"done_alert_{alert['id']}", help="Tandai selesai"):
+                            dismiss_alert(alert['id'])
+                            if alert.get("fact_id"):
+                                update_fact_status(alert["fact_id"], "done")
+                            st.rerun()
+                    with col3:
+                        if st.button("✕", key=f"dismiss_alert_{alert['id']}", help="Abaikan"):
+                            dismiss_alert(alert['id'])
+                            st.rerun()
+
         for msg in st.session_state.chat_history:
             with st.chat_message(msg["role"]):
                 st.write(msg["content"])
@@ -160,8 +194,16 @@ if st.session_state.authenticated:
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             simpan_chat("USER", prompt)
             
+            # V8: Deteksi pertanyaan tentang tugas
+            task_keywords = ["tugas", "deadline", "belum selesai", "masih aktif", "apa saja", "yang belum"]
+            is_task_query = any(kw in prompt.lower() for kw in task_keywords)
+
             with st.spinner("Berpikir..."):
-                jawaban = chat_saki(prompt, st.session_state.chat_history)
+                if is_task_query:
+                    jawaban = answer_task_query()
+                else:
+                    jawaban = chat_saki(prompt, st.session_state.chat_history)
+
                 st.session_state.chat_history.append({"role": "assistant", "content": jawaban})
                 simpan_chat(NAMA_AI.upper(), jawaban)
                 
@@ -173,7 +215,7 @@ if st.session_state.authenticated:
                         success, error = simpan_fakta(hasil["category"], hasil["fact"], "auto", hasil["confidence"], importance)
                         if not success:
                             logger.warning(f"Auto-save failed: {error}")
-            
+
             st.rerun()
     
     # ===== RINGKASAN =====
@@ -1025,8 +1067,8 @@ if st.session_state.authenticated:
             st.metric("Insight", len(reflections))
         
         st.divider()
-        st.caption(f"🤖 {NAMA_AI} v6.0 — Reflection Engine | Streamlit + Ollama")
+        st.caption(f"🤖 {NAMA_AI} v8.0 — Proactive Assistant | Streamlit + Ollama")
         
 # ========== FOOTER ==========
 st.sidebar.divider()
-st.sidebar.caption(f"🤖 {NAMA_AI} v6.0 — Reflection Engine")
+st.sidebar.caption(f"🤖 {NAMA_AI} v8.0 — Proactive Assistant")
