@@ -73,25 +73,36 @@ Saki adalah asisten AI pribadi yang berjalan **sepenuhnya di komputer Anda**. Ti
 ```bash
 git clone https://github.com/USERNAME/saki-ai-assistant.git
 cd saki-ai-assistant
-2. Setup Virtual Environment
-bash
+```
+
+### 2. Setup Virtual Environment
+```bash
 python -m venv venv
 venv\Scripts\activate  # Windows
 source venv/bin/activate  # Linux/Mac
-3. Install Dependencies
-bash
+```
+
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
-4. Setup Model AI
-bash
+```
+
+### 4. Setup Model AI
+```bash
 ollama pull qwen3:4b
 ollama pull nomic-embed-text
-5. Konfigurasi
-bash
+```
+
+### 5. Konfigurasi
+```bash
 copy .env.example .env
+```
 # Edit .env — ganti ADMIN_PASSWORD
-6. Jalankan
-bash
+
+### 6. Jalankan
+```bash
 streamlit run saki_server.py
+```
 Buka http://localhost:8501 — login dengan password di .env.
 
 📁 Struktur Project
@@ -125,15 +136,18 @@ E:\Priv Bot\
 └── Audit/                  # Laporan audit
     ├── v4.0/
     └── v8.0/
+
 🚀 Akses Multi-Device
 Mode	Link	Syarat
 Lokal	http://localhost:8501	PC yang sama
 WiFi/Hotspot	http://192.168.x.x:8501	Jaringan sama
 Remote	http://[tailscale-ip]:8501	Tailscale aktif
+
 🧪 Testing
 bash
 pip install pytest
 pytest tests/ -v
+
 📊 Riwayat Versi
 Versi	Fitur
 V1	Chat + Ringkasan terminal
