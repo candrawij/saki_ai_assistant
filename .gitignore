@@ -31,7 +31,7 @@ __pycache__/
 Thumbs.db
 
 # Audit
-Audit/
+audit/
 
 # Folder dan File Log
 log/
