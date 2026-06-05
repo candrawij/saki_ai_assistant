@@ -561,3 +561,223 @@ Ringkasan:"""
     except Exception as e:
         logger.error(f"Weekly summary failed: {str(e)}", exc_info=True)
         return f"Minggu ini: {stats['week_facts']} fakta, {stats['week_insights']} insight, {stats['week_chats']} chat."
+
+def extract_relationships() -> Tuple[int, str]:
+    """
+    AI menganalisis semua fakta dan mencari hubungan.
+    Return (jumlah_relationships, error_message)
+    """
+    from saki_database import lihat_semua_fakta, simpan_relationship, hapus_semua_relationships
+    
+    fakta = lihat_semua_fakta()
+    if len(fakta) < 3:
+        return 0, "Minimal 3 fakta untuk extract relationships."
+    
+    # Hapus relationships lama
+    hapus_semua_relationships()
+    
+    fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
+    
+    prompt = f"""Analisis fakta-fakta berikut. Temukan PASANGAN fakta yang SALING TERKAIT.
+
+{fakta_text}
+
+Dua fakta TERKAIT jika:
+- Membahas topik yang sama (proyek yang sama, hobi yang sama, dll)
+- Satu fakta adalah bagian dari yang lain
+- Satu fakta mendukung atau menjelaskan yang lain
+
+Output JSON array:
+[
+  {{"source_id": 1, "target_id": 3, "relation_type": "related", "confidence": 0.9, "reason": "Satu proyek yang sama"}},
+  ...
+]
+
+HANYA tampilkan pasangan yang benar-benar terkait. Jangan memaksakan."""
+
+    try:
+        response = ollama.chat(model=MODEL, messages=[
+            {"role": "system", "content": "Kamu sistem analisis hubungan pengetahuan. Jawab HANYA JSON array."},
+            {"role": "user", "content": prompt}
+        ])
+        raw = response["message"]["content"].strip()
+        
+        if raw.startswith("```"):
+            parts = raw.split("```")
+            for part in parts:
+                part = part.strip()
+                if part.startswith("json"):
+                    part = part[4:].strip()
+                if part.startswith("["):
+                    raw = part
+                    break
+        
+        relationships = json.loads(raw)
+        
+        if not isinstance(relationships, list):
+            return 0, "AI tidak mengembalikan format valid."
+        
+        saved = 0
+        for rel in relationships:
+
+            source_id = rel.get("source_id") or rel.get("id1") or rel.get("source") or rel.get("from")
+            target_id = rel.get("target_id") or rel.get("id2") or rel.get("target") or rel.get("to")
+            
+            if not source_id or not target_id:
+                logger.warning(f"Skipping relationship: missing source/target - {rel}")
+                continue
+            
+            relation_type = rel.get("relation_type") or rel.get("type") or rel.get("relation") or "related"
+            confidence = rel.get("confidence") or rel.get("conf") or rel.get("score") or 0.7
+            
+            try:
+                source_id = int(source_id)
+                target_id = int(target_id)
+                confidence = float(confidence)
+            except (ValueError, TypeError):
+                logger.warning(f"Skipping relationship: invalid types - {rel}")
+                continue
+            
+            rid = simpan_relationship(source_id, target_id, relation_type, confidence)
+            if rid:
+                saved += 1
+        
+        logger.info(f"Extracted {saved} relationships from {len(fakta)} facts")
+        return saved, ""
+    
+    except json.JSONDecodeError as e:
+        logger.error(f"Relationship extraction JSON failed: {str(e)}")
+        return 0, "Gagal memproses hasil AI."
+    except Exception as e:
+        logger.error(f"Relationship extraction failed: {str(e)}", exc_info=True)
+        return 0, f"Error: {type(e).__name__}"
+
+
+def build_knowledge_graph() -> Dict:
+    """Bangun knowledge graph dari relationships."""
+    from saki_database import lihat_semua_relationships, lihat_semua_fakta
+    
+    relationships = lihat_semua_relationships()
+    fakta_list = lihat_semua_fakta()
+    fakta = {f[0]: f for f in fakta_list}
+    
+    # Build nodes
+    nodes = {}
+    for f_id, f_data in fakta.items():
+        nodes[f_id] = {
+            "id": f_id,
+            "category": f_data[1],
+            "content": f_data[2][:80],
+            "importance": f_data[5]
+        }
+    
+    # Build edges
+    edges = []
+    for rel in relationships:
+        edges.append({
+            "id": rel["id"],
+            "source": rel["source_id"],
+            "target": rel["target_id"],
+            "type": rel["relation_type"],
+            "confidence": rel["confidence"]
+        })
+    
+    # Find connected components (clusters)
+    clusters = []
+    visited = set()
+    
+    for node_id in nodes:
+        if node_id not in visited:
+            cluster = set()
+            queue = [node_id]
+            while queue:
+                current = queue.pop(0)
+                if current not in visited:
+                    visited.add(current)
+                    cluster.add(current)
+                    for edge in edges:
+                        if edge["source"] == current and edge["target"] not in visited:
+                            queue.append(edge["target"])
+                        if edge["target"] == current and edge["source"] not in visited:
+                            queue.append(edge["source"])
+            if len(cluster) >= 2:
+                clusters.append(cluster)
+    
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "clusters": clusters,
+        "total_nodes": len(nodes),
+        "total_edges": len(edges),
+        "total_clusters": len(clusters)
+    }
+
+
+def generate_weekly_summary_v2() -> str:
+    """Generate ringkasan mingguan V2 — fokus ke topik spesifik."""
+    from saki_database import get_weekly_stats, lihat_semua_fakta
+    
+    stats = get_weekly_stats()
+    
+    if stats.get("week_facts", 0) == 0:
+        return "Minggu ini belum ada aktivitas."
+    
+    # Ambil fakta minggu ini
+    import datetime
+    week_start = stats["week_start"]
+    
+    fakta_minggu_ini = []
+    for f in lihat_semua_fakta():
+        try:
+            if f[8] and f[8] >= week_start:
+                fakta_minggu_ini.append(f)
+        except:
+            continue
+    
+    if not fakta_minggu_ini:
+        return "Tidak ada fakta baru minggu ini."
+    
+    fakta_text = "\n".join([f"- [{f[1]}] {f[2][:100]}" for f in fakta_minggu_ini[:20]])
+    
+    prompt = f"""Buat ringkasan mingguan yang SPESIFIK. Sebutkan TOPIK-TOPIK yang dibahas, bukan jumlah.
+
+Fakta minggu ini:
+{fakta_text}
+
+Aturan:
+1. Sebutkan topik spesifik (contoh: "website topup", "machine learning", "peralatan kopi")
+2. JANGAN sebutkan jumlah angka
+3. 2-3 kalimat dalam Bahasa Indonesia natural
+4. Fokus ke topik yang PALING DOMINAN
+
+Ringkasan:"""
+
+    try:
+        response = ollama.chat(model=MODEL, messages=[
+            {"role": "system", "content": "Kamu merangkum aktivitas mingguan dengan fokus ke TOPIK, bukan jumlah."},
+            {"role": "user", "content": prompt}
+        ])
+        return response["message"]["content"].strip()
+    except Exception as e:
+        logger.error(f"Weekly summary v2 failed: {str(e)}", exc_info=True)
+        return "Gagal membuat ringkasan."
+
+
+def generate_graph_summary(cluster_facts: List[str]) -> str:
+    """Generate nama/deskripsi untuk satu cluster knowledge graph."""
+    if len(cluster_facts) < 2:
+        return cluster_facts[0] if cluster_facts else "Cluster"
+    
+    prompt = f"""Beri nama singkat (2-4 kata) untuk kelompok fakta berikut:
+{chr(10).join(cluster_facts)}
+
+Nama:"""
+
+    try:
+        response = ollama.chat(model=MODEL, messages=[
+            {"role": "system", "content": "Jawab HANYA 2-4 kata."},
+            {"role": "user", "content": prompt}
+        ])
+        return response["message"]["content"].strip()
+    except:
+        return "Topik Terkait"

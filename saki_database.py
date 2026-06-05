@@ -102,6 +102,17 @@ def init_db():
             importance INTEGER DEFAULT 9,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )''')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS relationships (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_id INTEGER NOT NULL,
+            target_id INTEGER NOT NULL,
+            relation_type TEXT DEFAULT 'related',
+            confidence REAL DEFAULT 0.7,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (source_id) REFERENCES facts(id),
+            FOREIGN KEY (target_id) REFERENCES facts(id)
+        )''')
         
         # Auto-migration
         c.execute("PRAGMA table_info(facts)")
@@ -608,3 +619,82 @@ def get_weekly_stats() -> Dict:
     except Exception as e:
         logger.error(f"Failed to get weekly stats: {str(e)}", exc_info=True)
         return {}
+    
+def simpan_relationship(source_id: int, target_id: int, relation_type: str = "related", confidence: float = 0.7) -> Optional[int]:
+    """Simpan hubungan antar fakta."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            # Cek duplikat
+            c.execute("SELECT id FROM relationships WHERE (source_id = ? AND target_id = ?) OR (source_id = ? AND target_id = ?)",
+                      (source_id, target_id, target_id, source_id))
+            if c.fetchone():
+                return None
+            
+            c.execute("INSERT INTO relationships (source_id, target_id, relation_type, confidence) VALUES (?, ?, ?, ?)",
+                      (source_id, target_id, relation_type, confidence))
+            conn.commit()
+            return c.lastrowid
+    except Exception as e:
+        logger.error(f"Failed to save relationship: {str(e)}", exc_info=True)
+        return None
+
+def lihat_semua_relationships() -> List[Dict]:
+    """Ambil semua relationships dengan info fakta. Return list of dicts."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT r.id, r.source_id, r.target_id, r.relation_type, r.confidence,
+                       f1.content as source_content, f1.category as source_cat,
+                       f2.content as target_content, f2.category as target_cat
+                FROM relationships r
+                JOIN facts f1 ON r.source_id = f1.id
+                JOIN facts f2 ON r.target_id = f2.id
+                WHERE f1.deleted = 0 AND f2.deleted = 0
+                ORDER BY r.confidence DESC
+            """)
+            rows = c.fetchall()
+            
+            # Convert to list of dicts untuk akses yang lebih aman
+            result = []
+            for row in rows:
+                result.append({
+                    "id": row[0],
+                    "source_id": row[1],
+                    "target_id": row[2],
+                    "relation_type": row[3],
+                    "confidence": row[4],
+                    "source_content": row[5],
+                    "source_cat": row[6],
+                    "target_content": row[7],
+                    "target_cat": row[8]
+                })
+            return result
+    except Exception as e:
+        logger.error(f"Failed to fetch relationships: {str(e)}", exc_info=True)
+        return []
+
+def hapus_relationship(rel_id: int) -> bool:
+    """Hapus relationship."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("DELETE FROM relationships WHERE id = ?", (rel_id,))
+            conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to delete relationship {rel_id}: {str(e)}", exc_info=True)
+        return False
+
+def hapus_semua_relationships() -> bool:
+    """Hapus semua relationships (untuk regenerate)."""
+    try:
+        with get_db() as conn:
+            c = conn.cursor()
+            c.execute("DELETE FROM relationships")
+            conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to clear relationships: {str(e)}", exc_info=True)
+        return False

@@ -26,6 +26,7 @@ from saki_database import (
     edit_reflection, get_reflection_stats,
     lihat_semua_dokumen, lihat_dokumen_by_id, hapus_dokumen,
     simpan_dokumen, tambah_ke_chroma, cari_dokumen_semantik, get_daily_stats, get_weekly_stats,
+    lihat_semua_relationships, hapus_relationship, hapus_semua_relationships,
     init_chroma, get_db
 )
 from saki_ai import (
@@ -33,7 +34,8 @@ from saki_ai import (
     ringkas_teks, chat_saki, auto_ekstrak_fakta, auto_rate_importance,
     merge_fakta_dengan_ai, deteksi_duplikat_semantik,
     generate_reflection, save_reflections, generate_timeline, generate_timeline_summary,
-    generate_morning_greeting, generate_weekly_summary
+    generate_morning_greeting, generate_weekly_summary, extract_relationships, build_knowledge_graph, 
+    generate_weekly_summary_v2, generate_graph_summary
 )
 from saki_files import (
     ekstrak_teks_dari_pdf, ekstrak_teks_dari_docx, ekstrak_teks_dari_txt, proses_upload
@@ -113,7 +115,8 @@ with st.sidebar:
         
         menu = st.radio("Menu", [
             "💬 Chat", "📝 Ringkasan", "📚 Memory", "📄 Dokumen",
-            "🧠 Intelligence", "🧠 Reflection", "📊 Daily Recap", "⚙️ Pengaturan"
+            "🧠 Intelligence", "🧠 Reflection", "📊 Daily Recap", 
+            "🔗 Knowledge Graph", "⚙️ Pengaturan"
         ])
         
         if st.button("🚪 Logout"):
@@ -787,7 +790,7 @@ if st.session_state.authenticated:
             st.subheader("💡 Ringkasan AI")
             if st.button("🔄 Generate Weekly Summary"):
                 with st.spinner("Menganalisis minggu ini..."):
-                    summary = generate_weekly_summary()
+                    summary = generate_weekly_summary_v2()
                     st.success(summary)
             
             st.divider()
@@ -799,6 +802,105 @@ if st.session_state.authenticated:
                     st.write(f"- **{cat}**: {count} fakta")
             else:
                 st.info("Belum ada data minggu ini.")
+
+    # ===== KNOWLEDGE GRAPH (V7) =====
+    elif menu == "🔗 Knowledge Graph":
+        st.title("🔗 Personal Knowledge Graph")
+        st.caption("AI memvisualisasikan hubungan antar pengetahuan Anda")
+        
+        # Stats
+        graph = build_knowledge_graph()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("📝 Fakta", graph["total_nodes"])
+        with col2:
+            st.metric("🔗 Koneksi", graph["total_edges"])
+        with col3:
+            st.metric("📦 Cluster", graph["total_clusters"])
+        with col4:
+            rels = lihat_semua_relationships()
+            st.metric("Total Relasi", len(rels))
+        
+        st.divider()
+        
+        # Extract relationships
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.write("AI akan menganalisis semua fakta dan mencari hubungan.")
+        with col2:
+            if st.button("🔍 Extract Relationships", type="primary", use_container_width=True):
+                with st.spinner("Menganalisis hubungan antar fakta..."):
+                    count, error = extract_relationships()
+                    if error:
+                        st.warning(error)
+                    else:
+                        st.success(f"✅ {count} hubungan ditemukan!")
+                        st.rerun()
+        
+        st.divider()
+        
+        # Visualisasi Graph
+        if graph["total_edges"] > 0:
+            st.subheader("📊 Knowledge Graph")
+            
+            # Tampilkan per cluster
+            for i, cluster in enumerate(graph["clusters"]):
+                cluster_nodes = [graph["nodes"][nid] for nid in cluster if nid in graph["nodes"]]
+                
+                if not cluster_nodes:
+                    continue
+                
+                # Generate nama cluster
+                facts_in_cluster = [n["content"] for n in cluster_nodes]
+                cluster_name = generate_graph_summary(facts_in_cluster)
+                
+                with st.expander(f"📦 Cluster {i+1}: {cluster_name} ({len(cluster_nodes)} fakta)"):
+                    # Tampilkan node dalam cluster
+                    for node in cluster_nodes:
+                        category_icon = {
+                            "proyek": "💻", "preferensi": "❤️", "kontak": "📞",
+                            "jadwal": "📅", "akun": "🔐", "skill": "🛠️",
+                            "pekerjaan": "💼", "pendidikan": "📚", "umum": "📌",
+                            "insight": "💡"
+                        }.get(node["category"], "📌")
+                        
+                        st.write(f"{category_icon} **[{node['category']}]** {node['content']}")
+                        
+                        # Cari edges untuk node ini
+                        node_edges = [e for e in graph["edges"] if e["source"] == node["id"] or e["target"] == node["id"]]
+                        for edge in node_edges:
+                            if edge["source"] == node["id"]:
+                                target = graph["nodes"].get(edge["target"])
+                                if target:
+                                    st.caption(f"  └─🔗 terkait dengan: {target['content'][:60]}... (conf: {edge['confidence']:.0%})")
+                    
+                    # Tombol hapus cluster
+                    if st.button(f"🗑️ Hapus Cluster {i+1}", key=f"hapus_cluster_{i}"):
+                        cluster_edges = [e for e in graph["edges"] if e["source"] in cluster or e["target"] in cluster]
+                        for edge in cluster_edges:
+                            hapus_relationship(edge["id"])
+                        st.rerun()
+            
+            st.divider()
+            
+            # Semua relationships dalam tabel
+            st.subheader("📋 Semua Relationships")
+            all_rels = lihat_semua_relationships()
+            
+            for rel in all_rels[:20]:
+                col1, col2, col3 = st.columns([3, 3, 1])
+                with col1:
+                    st.write(f"**[{rel['source_cat']}]** {rel['source_content'][:60]}...")
+                with col2:
+                    st.write(f"**[{rel['target_cat']}]** {rel['target_content'][:60]}...")
+                with col3:
+                    if st.button(f"🗑️", key=f"del_rel_{rel['id']}"):
+                        hapus_relationship(rel['id'])
+                        st.rerun()
+        else:
+            st.info("Belum ada hubungan antar fakta. Klik 'Extract Relationships' untuk memulai.")
+            st.write("AI akan mencari fakta-fakta yang saling terkait dan membangun knowledge graph.")
 
     # ===== PENGATURAN =====
     elif menu == "⚙️ Pengaturan":
