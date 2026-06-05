@@ -60,7 +60,7 @@ Saki adalah asisten AI pribadi yang berjalan **sepenuhnya di komputer Anda**. Ti
 - Notifikasi insight menunggu
 - Task query: "Apa tugas saya yang belum selesai?"
 
---
+---
 
 ## ⚙️ Instalasi
 
@@ -105,7 +105,7 @@ streamlit run saki_server.py
 ```
 Buka http://localhost:8501 — login dengan password di .env.
 
---
+---
 
 ### 📁 Struktur Project
 ```
@@ -140,7 +140,7 @@ E:\Priv Bot\
     └── v8.0/
 ```
 
---
+---
 
 ### 🚀 Akses Multi-Device
 | Mode Akses | Link | Syarat Koneksi |
@@ -149,7 +149,7 @@ E:\Priv Bot\
 | **WiFi / Hotspot (LAN)** | `http://192.168.x.x:8501` | Jaringan sama |
 | **Remote (Jarak Jauh)** | `http://[tailscale-ip]:8501` | Tailscale aktif |
 
---
+---
 
 ### 🧪 Testing
 ```bash
@@ -157,7 +157,7 @@ pip install pytest
 pytest tests/ -v
 ```
 
---
+---
 
 ### 📊 Riwayat Versi
 
@@ -176,7 +176,7 @@ pytest tests/ -v
 | **V7** | Personal Knowledge Graph |
 | **V8** | Proactive Assistant + Task Tracking |
 
---
+---
 
 ### ⚠️ Catatan
 * 100% lokal — tidak ada data keluar
@@ -189,12 +189,12 @@ pytest tests/ -v
 
 * Tailscale — untuk akses remote aman
 
---
+---
 
 ### 📄 Lisensi
 Personal project. Gunakan bebas untuk keperluan sendiri.
 
---
+---
 
 Dibangun dengan: Ollama · Streamlit · ChromaDB · SQLite · Python
 
