@@ -457,7 +457,11 @@ if st.session_state.authenticated:
                                             hapus_fakta(d['id2'])
                                             logger.info(f"Merge complete: {d['id1']} + {d['id2']} -> new fact saved")
                                             st.session_state.merge_message = f"✅ Berhasil merge! Fakta #{d['id1']} + #{d['id2']} digabung."
-                                            st.session_state.duplicate_results = None
+                                            # Hapus hanya pasangan ini dari daftar duplikat
+                                            st.session_state.duplicate_results = [
+                                                dup for dup in st.session_state.duplicate_results
+                                                if not (dup['id1'] == d['id1'] and dup['id2'] == d['id2'])
+                                            ]
                                         else:
                                             logger.error(f"Merge save failed: {error}")
                                             st.session_state.merge_message = f"❌ Gagal menyimpan: {error}"
