@@ -105,8 +105,10 @@ streamlit run saki_server.py
 ```
 Buka http://localhost:8501 — login dengan password di .env.
 
-📁 Struktur Project
-text
+---
+
+### 📁 Struktur Project
+```
 E:\Priv Bot\
 ├── saki_server.py          # Streamlit UI
 ├── saki_ai.py              # Fungsi AI (chat, ekstrak, reflection)
@@ -136,45 +138,63 @@ E:\Priv Bot\
 └── Audit/                  # Laporan audit
     ├── v4.0/
     └── v8.0/
+```
 
-🚀 Akses Multi-Device
-Mode	Link	Syarat
-Lokal	http://localhost:8501	PC yang sama
-WiFi/Hotspot	http://192.168.x.x:8501	Jaringan sama
-Remote	http://[tailscale-ip]:8501	Tailscale aktif
+---
 
-🧪 Testing
-bash
+### 🚀 Akses Multi-Device
+| Mode Akses | Link | Syarat Koneksi |
+| :--- | :--- | :--- |
+| **Lokal** | `http://localhost:8501` | PC yang sama |
+| **WiFi / Hotspot (LAN)** | `http://192.168.x.x:8501` | Jaringan sama |
+| **Remote (Jarak Jauh)** | `http://[tailscale-ip]:8501` | Tailscale aktif |
+
+---
+
+### 🧪 Testing
+```bash
 pip install pytest
 pytest tests/ -v
+```
 
-📊 Riwayat Versi
-Versi	Fitur
-V1	Chat + Ringkasan terminal
-V1.5	SQLite + Riwayat chat
-V2	Auto-ekstraksi fakta
-V2.5	Memory Control Center
-V3	Knowledge Base + Semantic Search
-V4	Web UI + Multi-device + Tailscale
-V4.5	Memory Intelligence
-V5	Reflection Engine
-V5.5	Timeline Engine
-V6	Daily Companion
-V7	Personal Knowledge Graph
-V8	Proactive Assistant + Task Tracking
-⚠️ Catatan
-100% lokal — tidak ada data keluar
+---
 
-Single user — didesain untuk penggunaan pribadi
+### 📊 Riwayat Versi
 
-Model Qwen 3 4B — bisa diganti model lain di .env
+| Versi | Fitur |
+| :---: | :--- |
+| **V1** | Chat + Ringkasan terminal |
+| **V1.5** | SQLite + Riwayat chat |
+| **V2** | Auto-ekstraksi fakta |
+| **V2.5** | Memory Control Center |
+| **V3** | Knowledge Base + Semantic Search |
+| **V4** | Web UI + Multi-device + Tailscale |
+| **V4.5** | Memory Intelligence |
+| **V5** | Reflection Engine |
+| **V5.5** | Timeline Engine |
+| **V6** | Daily Companion |
+| **V7** | Personal Knowledge Graph |
+| **V8** | Proactive Assistant + Task Tracking |
 
-SQLite — cukup untuk ribuan fakta
+---
 
-Tailscale — untuk akses remote aman
+### ⚠️ Catatan
+* 100% lokal — tidak ada data keluar
 
-📄 Lisensi
+* Single user — didesain untuk penggunaan pribadi
+
+* Model Qwen 3 4B — bisa diganti model lain di .env
+
+* SQLite — cukup untuk ribuan fakta
+
+* Tailscale — untuk akses remote aman
+
+---
+
+### 📄 Lisensi
 Personal project. Gunakan bebas untuk keperluan sendiri.
+
+---
 
 Dibangun dengan: Ollama · Streamlit · ChromaDB · SQLite · Python
 Versi: 8.0 — Proactive Assistant
