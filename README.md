@@ -96,8 +96,8 @@ ollama pull nomic-embed-text
 ### 5. Konfigurasi
 ```bash
 copy .env.example .env
-```
 # Edit .env — ganti ADMIN_PASSWORD
+```
 
 ### 6. Jalankan
 ```bash
