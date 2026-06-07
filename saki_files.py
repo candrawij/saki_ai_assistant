@@ -12,7 +12,7 @@ from saki_database import simpan_dokumen, tambah_ke_chroma, DOCUMENTS_FOLDER
 logger = logging.getLogger("saki")
 
 # Local config
-SUMMARY_MAX_LENGTH = int(os.getenv("SUMMARY_MAX_LENGTH", 4000))
+SUMMARY_MAX_LENGTH = int(os.getenv("SUMMARY_MAX_LENGTH", 8000))
 MODEL = os.getenv("MODEL", "qwen3:4b")
 SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT", "") or "Ringkas dokumen berikut." 
 
@@ -91,17 +91,17 @@ def ekstrak_teks_dari_csv(filepath: str) -> Optional[str]:
             return None
         
         text = ""
-        for row in rows[:101]:
+        for row in rows[:501]:
             text += " | ".join(row) + "\n"
         
-        logger.info(f"Berhasil ekstrak CSV: {os.path.basename(filepath)} ({len(rows)} baris)")
+        logger.info(f"Berhasil eks`trak CSV: {os.path.basename(filepath)} ({len(rows)} baris)")
         return text.strip()
     except UnicodeDecodeError:
         try:
             with open(filepath, "r", encoding="latin-1") as f:
                 reader = csv.reader(f)
                 rows = list(reader)
-            text = "\n".join([" | ".join(row) for row in rows[:101]])
+            text = "\n".join([" | ".join(row) for row in rows[:501]])
             return text.strip()
         except Exception as e:
             logger.error(f"Gagal ekstrak CSV: {str(e)}")
@@ -188,7 +188,25 @@ def proses_upload(uploaded_file) -> Tuple[Optional[int], str]:
             logger.warning(f"Ekstraksi teks kosong: {filename}")
             return None, "Gagal mengekstrak teks. File mungkin kosong atau corrupt."
 
-        teks_ringkas = teks[:SUMMARY_MAX_LENGTH]
+        # V8.1: Untuk CSV besar, buat ringkasan statistik
+        if ext in [".csv", ".xlsx", ".xls"]:
+            lines = teks.split('\n')
+            jumlah_baris = len(lines)
+            header = lines[0] if lines else ""
+            
+            # Info statistik
+            teks_ringkas = f"File CSV: {filename}\n"
+            teks_ringkas += f"Jumlah total baris: {jumlah_baris}\n"
+            teks_ringkas += f"Header: {header}\n\n"
+            teks_ringkas += f"10 baris pertama:\n"
+            teks_ringkas += '\n'.join(lines[:11])  # header + 10 baris
+            teks_ringkas += f"\n\n10 baris terakhir:\n"
+            teks_ringkas += '\n'.join(lines[-10:])
+            teks_ringkas = teks_ringkas[:SUMMARY_MAX_LENGTH]
+        else:
+            teks_ringkas = teks[:SUMMARY_MAX_LENGTH]       
+
+        # Prompt dibuat di luar if-else (berlaku untuk semua format)
         prompt = f"Ringkas dokumen berikut:\n\nJudul: {filename}\n\n{teks_ringkas}"
         try:
             response = ollama.chat(model=MODEL, messages=[

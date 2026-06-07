@@ -353,7 +353,25 @@ if st.session_state.authenticated:
                             if pertanyaan:
                                 doc = lihat_dokumen_by_id(d[0])
                                 if doc:
-                                    prompt = f"DOKUMEN: {doc[1]}\n\nISI:\n{doc[5][:3000]}\n\nPERTANYAAN: {pertanyaan}"
+                                    # Untuk CSV/Excel, pakai ringkasan statistik
+                                    if doc[3] in ["CSV", "Excel"]:
+                                        # Buat ringkasan dari full_text
+                                        lines = doc[5].split('\n') if doc[5] else []
+                                        jumlah_baris = len(lines)
+                                        header = lines[0] if lines else ""
+                                        
+                                        isi = f"File {doc[3]}: {doc[1]}\n"
+                                        isi += f"Jumlah total baris: {jumlah_baris}\n"
+                                        isi += f"Header: {header}\n\n"
+                                        isi += f"10 baris pertama:\n"
+                                        isi += '\n'.join(lines[:11])
+                                        isi += f"\n\n10 baris terakhir:\n"
+                                        isi += '\n'.join(lines[-10:])
+                                        isi = isi[:3000]
+                                    else:
+                                        isi = doc[5][:3000] if doc[5] else ""
+                                    
+                                    prompt = f"DOKUMEN: {doc[1]}\n\nISI:\n{isi}\n\nPERTANYAAN: {pertanyaan}"
                                     response = ollama.chat(model=MODEL, messages=[
                                         {"role": "system", "content": "Jawab berdasarkan dokumen."},
                                         {"role": "user", "content": prompt}
@@ -371,8 +389,16 @@ if st.session_state.authenticated:
                             except Exception as e:
                                 logger.error(f"Failed cleaning chroma entries for doc {d[0]}: {type(e).__name__}: {str(e)}", exc_info=True)
                             hapus_dokumen(d[0])
-                            if os.path.exists(d[2]):
-                                os.remove(d[2])
+
+                            file_path = d[2]
+                            if not os.path.isabs(file_path):
+                                file_path = os.path.join(os.getcwd(), file_path)
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                                logger.info(f"Deleted file: {file_path}")
+                            else:
+                                logger.warning(f"File not found for deletion: {file_path}")
+                                
                             st.rerun()
                     
                     if st.session_state.get(f"show_doc_{d[0]}"):

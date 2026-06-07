@@ -774,16 +774,21 @@ def generate_weekly_summary_v2() -> str:
     if docs_minggu_ini:
         fakta_text += "\nDOKUMEN MINGGU INI:\n" + "\n".join(docs_minggu_ini[:5])
     
-    prompt = f"""Buat ringkasan mingguan yang SPESIFIK. Sebutkan TOPIK-TOPIK yang dibahas, bukan jumlah.
+    prompt = f"""Buat ringkasan mingguan yang SPESIFIK dan INFORMATIF.
 
 Fakta minggu ini:
 {fakta_text}
 
 Aturan:
-1. Sebutkan topik spesifik (contoh: "website topup", "machine learning", "peralatan kopi")
-2. JANGAN sebutkan jumlah angka
-3. 2-3 kalimat dalam Bahasa Indonesia natural
-4. Fokus ke topik yang PALING DOMINAN
+1. Sebutkan topik-topik spesifik yang dibahas (contoh: "pengembangan website topup", "belajar Python", "riset ML")
+2. Sebutkan aktivitas penting (upload dokumen, insight baru, deadline)
+3. JANGAN sebutkan jumlah angka
+4. Tulis dalam 3-4 kalimat Bahasa Indonesia yang natural dan mengalir
+5. Jika ada dokumen yang diupload, sebutkan judulnya
+6. Akhiri dengan satu kalimat tentang fokus utama minggu ini
+
+Contoh output yang baik:
+"Minggu ini Anda fokus pada pengembangan website topup — membahas struktur database dan integrasi payment gateway. Anda juga mengupload proposal skripsi tentang machine learning. Beberapa fakta baru tentang preferensi kopi dan anime tercatat. Fokus utama minggu ini adalah persiapan MVP website topup."
 
 Ringkasan:"""
 
