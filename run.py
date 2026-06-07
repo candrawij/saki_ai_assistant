@@ -16,7 +16,7 @@ import uvicorn
 
 def main():
     print("=" * 50)
-    print("🤖 Saki Core v1.0 — Starting...")
+    print("Saki Core v1.0 — Starting...")
     print("=" * 50)
     
     # Start lifecycle manager
@@ -43,7 +43,7 @@ def main():
     api_thread = threading.Thread(target=run_api, daemon=True)
     api_thread.start()
     
-    print("✅ All systems running!")
+    print("[OK] All systems running!")
     print("   Chat: http://localhost:8501")
     print("   Monitor API: http://localhost:8503/api/status")
     print("   Press Ctrl+C to stop")
@@ -52,11 +52,11 @@ def main():
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\n🛑 Shutting down...")
+        print("\n[STOP] Shutting down...")
         monitor.stop()
         scheduler.stop()
         lm.stop_all()
-        print("✅ All systems stopped")
+        print("[OK] All systems stopped")
 
 if __name__ == "__main__":
     main()
