@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import saki_database
+import src.database as saki_database
 
 def test_init_and_save_fact(tmp_path, monkeypatch):
     # Use a temporary DB file for tests

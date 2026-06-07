@@ -2,6 +2,9 @@
 Saki AI Module
 Semua fungsi AI: chat, ringkas, ekstrak, reflection, merge
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import ollama
 import json
@@ -22,7 +25,7 @@ MIN_CONFIDENCE_THRESHOLD = 0.5
 MIN_IMPORTANCE_FOR_TRACKING = 5
 
 # Import database functions
-from saki_database import (
+from src.database import (
     lihat_semua_fakta, lihat_fakta_by_id, simpan_fakta, simpan_reflection,
     hapus_fakta, cek_fakta_duplikat, track_access, tandai_fakta_reflected,
     ambil_fakta_belum_reflected, get_facts_for_timeline,
@@ -393,7 +396,7 @@ def save_reflections(insights: List[Dict]) -> int:
 # ========== TIMELINE (V5.5) ==========
 def generate_timeline() -> List[Dict]:
     """Generate timeline 3 level: bulan → minggu → hari."""
-    from saki_database import get_all_timeline_data
+    from src.database import get_all_timeline_data
     from collections import defaultdict
     import datetime
     
@@ -559,7 +562,7 @@ Ringkasan:"""
     
 def generate_morning_greeting() -> str:
     """Generate sapaan pagi dengan rekap kemarin."""
-    from saki_database import get_daily_stats
+    from src.database import get_daily_stats
     import datetime
     
     yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -590,7 +593,7 @@ def extract_relationships() -> Tuple[int, str]:
     AI menganalisis semua fakta dan mencari hubungan.
     Return (jumlah_relationships, error_message)
     """
-    from saki_database import lihat_semua_fakta, simpan_relationship, hapus_semua_relationships
+    from src.database import lihat_semua_fakta, simpan_relationship, hapus_semua_relationships
     
     fakta = lihat_semua_fakta()
     if len(fakta) < 3:
@@ -678,7 +681,7 @@ HANYA tampilkan pasangan yang benar-benar terkait. Jangan memaksakan."""
 
 def build_knowledge_graph() -> Dict:
     """Bangun knowledge graph dari relationships."""
-    from saki_database import lihat_semua_relationships, lihat_semua_fakta
+    from src.database import lihat_semua_relationships, lihat_semua_fakta
     
     relationships = lihat_semua_relationships()
     fakta_list = lihat_semua_fakta()
@@ -738,7 +741,7 @@ def build_knowledge_graph() -> Dict:
 
 def generate_weekly_summary_v2() -> str:
     """Generate ringkasan mingguan V2 — fokus ke topik spesifik."""
-    from saki_database import get_weekly_stats, lihat_semua_fakta
+    from src.database import get_weekly_stats, lihat_semua_fakta
     
     stats = get_weekly_stats()
     
@@ -805,7 +808,7 @@ Ringkasan:"""
 # ========== PROACTIVE ASSISTANT (V8) ==========
 def check_proactive_triggers() -> List[Dict]:
     """Cek semua trigger proaktif. Return list of alerts."""
-    from saki_database import (
+    from src.database import (
         cek_proyek_mengendap, cek_deadline_mendekat, 
         ambil_fakta_belum_reflected, simpan_alert, lihat_active_alerts
     )
@@ -835,7 +838,7 @@ def check_proactive_triggers() -> List[Dict]:
 
 def generate_proactive_greeting() -> str:
     """Generate sapaan pagi dengan info proaktif."""
-    from saki_database import get_daily_stats, lihat_active_alerts
+    from src.database import get_daily_stats, lihat_active_alerts
     import datetime
     
     yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -871,7 +874,7 @@ def generate_proactive_greeting() -> str:
 
 def answer_task_query() -> str:
     """Jawab pertanyaan seperti 'Apa tugas saya yang belum selesai?'"""
-    from saki_database import get_tasks_by_status
+    from src.database import get_tasks_by_status
     
     active_tasks = get_tasks_by_status('active')
     

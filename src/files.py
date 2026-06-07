@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import os
 import datetime
 import tempfile
@@ -7,7 +11,7 @@ from typing import Optional, Tuple
 
 import ollama
 
-from saki_database import simpan_dokumen, tambah_ke_chroma, DOCUMENTS_FOLDER
+from src.database import simpan_dokumen, tambah_ke_chroma, DOCUMENTS_FOLDER
 
 logger = logging.getLogger("saki")
 

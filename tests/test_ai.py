@@ -4,7 +4,7 @@ from pathlib import Path
 # Ensure project root is on sys.path so tests can import local modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import saki_ai
+import src.ai as saki_ai
 import ollama
 
 def test_auto_rate_importance(monkeypatch):

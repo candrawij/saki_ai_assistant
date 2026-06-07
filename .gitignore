@@ -37,3 +37,12 @@ audit/
 log/
 logs/
 *.log
+
+# Saki Core
+saki_core/config.yaml
+
+# Backups
+data/backups/
+
+# Dashboard
+dashboard/

@@ -2,6 +2,9 @@
 Saki Server - Streamlit UI
 AI Pribadi v8.0 — Proactive Assistant
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import streamlit as st
 import datetime
@@ -10,6 +13,7 @@ import json
 import tempfile
 import shutil
 import logging
+import logging.handlers
 from pathlib import Path
 from dotenv import load_dotenv
 import ollama
@@ -19,7 +23,7 @@ import re
 load_dotenv()
 
 # Import modul Saki
-from saki_database import (
+from src.database import (
     init_db, simpan_chat, simpan_fakta, lihat_semua_fakta, lihat_fakta_by_id,
     edit_fakta, hapus_fakta, cek_fakta_duplikat, update_importance,
     lihat_semua_reflections, lihat_reflection_by_id, hapus_reflection,
@@ -31,7 +35,7 @@ from saki_database import (
     update_fact_status, get_tasks_by_status, simpan_alert,
     init_chroma, get_db
 )
-from saki_ai import (
+from src.ai import (
     NAMA_AI, MODEL, SYSTEM_PROMPT, SUMMARY_MAX_LENGTH,
     ringkas_teks, chat_saki, auto_ekstrak_fakta, auto_rate_importance,
     merge_fakta_dengan_ai, deteksi_duplikat_semantik,
@@ -40,7 +44,7 @@ from saki_ai import (
     generate_weekly_summary_v2, generate_graph_summary, check_proactive_triggers, generate_proactive_greeting,
     answer_task_query
 )
-from saki_files import (
+from src.files import (
     ekstrak_teks_dari_pdf, ekstrak_teks_dari_docx, ekstrak_teks_dari_txt, proses_upload
 )
 
