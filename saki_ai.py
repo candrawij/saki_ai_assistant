@@ -9,6 +9,7 @@ import re
 import logging
 from typing import Optional, List, Tuple, Dict
 import datetime
+import os
 
 logger = logging.getLogger("saki")
 
@@ -24,11 +25,26 @@ MIN_IMPORTANCE_FOR_TRACKING = 5
 from saki_database import (
     lihat_semua_fakta, lihat_fakta_by_id, simpan_fakta, simpan_reflection,
     hapus_fakta, cek_fakta_duplikat, track_access, tandai_fakta_reflected,
-    ambil_fakta_belum_reflected, get_facts_for_timeline
+    ambil_fakta_belum_reflected, get_facts_for_timeline,
+    cari_dokumen_semantik, lihat_semua_dokumen
 )
 
 # ========== SYSTEM PROMPT ==========
+# Load self-knowledge
+self_text = ""
+self_path = "SAKI_SELF.md"
+if os.path.exists(self_path):
+    try:
+        with open(self_path, "r", encoding="utf-8") as f:
+            self_text = f.read()
+        logger.debug("Loaded SAKI_SELF.md for system prompt")
+    except Exception as e:
+        logger.warning(f"Failed to load SAKI_SELF.md: {str(e)}")
+
 SYSTEM_PROMPT = f"""Kamu adalah asisten AI pribadi bernama {NAMA_AI}.
+
+{self_text}
+
 Kamu membantu merangkum dokumen, menjawab pertanyaan, dan mengingat informasi penting.
 Kamu menjawab dalam Bahasa Indonesia yang natural, hangat, dan langsung ke inti.
 Saat merangkum, gunakan format:
@@ -52,7 +68,7 @@ def ringkas_teks(teks: str) -> str:
         return f"Maaf, gagal meringkas: {type(e).__name__}"
 
 def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
-    """Chat dengan Saki, termasuk konteks fakta."""
+    """Chat dengan Saki, termasuk konteks fakta dan dokumen."""
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     # Tambah fakta sebagai konteks
@@ -66,6 +82,23 @@ def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
             if f[5] >= MIN_IMPORTANCE_FOR_TRACKING:
                 track_access(f[0])
     
+    try:
+        dokumen_relevan = cari_dokumen_semantik(pesan, n_results=3)
+        if dokumen_relevan:
+            docs_text = []
+            for doc in dokumen_relevan:
+                nama = doc[1]  # filename
+                ringkasan = doc[4] if doc[4] else "Tidak ada ringkasan"
+                docs_text.append(f"📄 {nama}\n{ringkasan[:300]}")
+            
+            if docs_text:
+                messages.append({
+                    "role": "system",
+                    "content": "Dokumen yang relevan dengan pertanyaan user:\n\n" + "\n\n".join(docs_text)
+                })
+    except Exception as e:
+        logger.warning(f"Document search failed (non-critical): {str(e)}")
+ 
     # Tambah riwayat chat
     if riwayat_chat:
         for msg in riwayat_chat[-10:]:
@@ -401,6 +434,21 @@ def generate_timeline() -> List[Dict]:
             daily_data[date_key]["chat_count"] = c[1]
         except:
             continue
+
+     # V8.1: Tambah dokumen ke daily_data
+    all_documents = lihat_semua_dokumen()
+    
+    for d in all_documents:
+        try:
+            dt = datetime.datetime.strptime(d[4], "%Y-%m-%d %H:%M:%S")
+            date_key = dt.strftime("%Y-%m-%d")
+            if "documents" not in daily_data[date_key]:
+                daily_data[date_key]["documents"] = []
+            daily_data[date_key]["documents"].append({
+                "id": d[0], "filename": d[1], "type": d[2]
+            })
+        except:
+            continue
     
     # Group into weeks and months
     months = defaultdict(lambda: {"weeks": defaultdict(lambda: {"days": {}}), "total_items": 0})
@@ -416,8 +464,13 @@ def generate_timeline() -> List[Dict]:
         week_label = f"Minggu {week_num}"
         
         day_data = daily_data[date_str]
-        items_count = len(day_data["facts"]) + len(day_data["insights"]) + (1 if day_data["chat_count"] > 0 else 0)
-        
+        items_count = (
+            len(day_data.get("facts", [])) + 
+            len(day_data.get("insights", [])) + 
+            len(day_data.get("documents", [])) +
+            (1 if day_data.get("chat_count", 0) > 0 else 0)
+        )
+
         months[month_key]["name"] = month_name
         months[month_key]["year"] = dt.year
         months[month_key]["month_num"] = dt.month
@@ -707,6 +760,19 @@ def generate_weekly_summary_v2() -> str:
         return "Tidak ada fakta baru minggu ini."
     
     fakta_text = "\n".join([f"- [{f[1]}] {f[2][:100]}" for f in fakta_minggu_ini[:20]])
+
+    # V8.1: Tambah dokumen minggu ini
+    docs_minggu_ini = []
+    for d in lihat_semua_dokumen():
+        try:
+            if d[4] and d[4] >= week_start:
+                ringkasan = d[3][:100] if d[3] else "Tidak ada ringkasan"
+                docs_minggu_ini.append(f"- [DOKUMEN {d[2]}] {d[1]}: {ringkasan}")
+        except:
+            continue
+    
+    if docs_minggu_ini:
+        fakta_text += "\nDOKUMEN MINGGU INI:\n" + "\n".join(docs_minggu_ini[:5])
     
     prompt = f"""Buat ringkasan mingguan yang SPESIFIK. Sebutkan TOPIK-TOPIK yang dibahas, bukan jumlah.
 

@@ -240,7 +240,7 @@ if st.session_state.authenticated:
                     st.success(f"💾 Tersimpan: `{filepath}`")
         
         with tab2:
-            uploaded = st.file_uploader("Upload file", type=["pdf", "docx", "txt", "md"])
+            uploaded = st.file_uploader("Upload file", type=["pdf", "docx", "txt", "md", "csv", "xlsx", "xls"])
             if uploaded and st.button("Upload & Ringkas"):
                 with st.spinner("Memproses..."):
                     doc_id, ringkasan = proses_upload(uploaded)
@@ -316,7 +316,7 @@ if st.session_state.authenticated:
         tab1, tab2 = st.tabs(["Upload", "Daftar Dokumen"])
         
         with tab1:
-            uploaded = st.file_uploader("Upload dokumen", type=["pdf", "docx", "txt", "md"], key="doc_upload")
+            uploaded = st.file_uploader("Upload dokumen", type=["pdf", "docx", "txt", "md", "csv", "xlsx", "xls"], key="doc_upload")
             if uploaded and st.button("Upload"):
                 with st.spinner("Memproses dokumen..."):
                     doc_id, ringkasan = proses_upload(uploaded)
@@ -770,6 +770,11 @@ if st.session_state.authenticated:
                                     st.write("**📝 Fakta:**")
                                     for f in day["facts"]:
                                         st.write(f"- [#{f['id']}] [{f['category']}] {f['content'][:100]}")
+
+                                if day.get("documents"):
+                                    st.write("**📄 Dokumen:**")
+                                    for doc in day["documents"]:
+                                        st.write(f"- [{doc['type']}] {doc['filename']}")
                                 
                                 if day["insights"]:
                                     st.write("**💡 Insight:**")

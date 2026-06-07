@@ -78,6 +78,77 @@ def ekstrak_teks_dari_txt(filepath: str) -> Optional[str]:
         logger.error(f"Gagal baca file {os.path.basename(filepath)}: {type(e).__name__}: {str(e)}", exc_info=True)
         return None
 
+def ekstrak_teks_dari_csv(filepath: str) -> Optional[str]:
+    """Ekstrak teks dari file CSV."""
+    import csv
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+        
+        if not rows:
+            logger.warning(f"CSV kosong: {filepath}")
+            return None
+        
+        text = ""
+        for row in rows[:101]:
+            text += " | ".join(row) + "\n"
+        
+        logger.info(f"Berhasil ekstrak CSV: {os.path.basename(filepath)} ({len(rows)} baris)")
+        return text.strip()
+    except UnicodeDecodeError:
+        try:
+            with open(filepath, "r", encoding="latin-1") as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+            text = "\n".join([" | ".join(row) for row in rows[:101]])
+            return text.strip()
+        except Exception as e:
+            logger.error(f"Gagal ekstrak CSV: {str(e)}")
+            return None
+    except Exception as e:
+        logger.error(f"Gagal ekstrak CSV {os.path.basename(filepath)}: {type(e).__name__}: {str(e)}", exc_info=True)
+        return None
+
+
+def ekstrak_teks_dari_xlsx(filepath: str) -> Optional[str]:
+    """Ekstrak teks dari file Excel (.xlsx)."""
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(filepath, read_only=True, data_only=True)
+        
+        all_text = []
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            sheet_text = [f"=== Sheet: {sheet_name} ==="]
+            
+            row_count = 0
+            for row in ws.iter_rows(values_only=True):
+                if row_count > 100:
+                    sheet_text.append("... (dipotong)")
+                    break
+                sheet_text.append(" | ".join([str(cell) if cell is not None else "" for cell in row]))
+                row_count += 1
+            
+            all_text.append("\n".join(sheet_text))
+        
+        wb.close()
+        text = "\n\n".join(all_text)
+        
+        if not text.strip():
+            logger.warning(f"Excel kosong: {filepath}")
+            return None
+        
+        logger.info(f"Berhasil ekstrak Excel: {os.path.basename(filepath)}")
+        return text.strip()
+    
+    except ImportError:
+        logger.error("openpyxl tidak terinstall. Install dengan: pip install openpyxl")
+        return None
+    except Exception as e:
+        logger.error(f"Gagal ekstrak Excel {os.path.basename(filepath)}: {type(e).__name__}: {str(e)}", exc_info=True)
+        return None
+
 
 def proses_upload(uploaded_file) -> Tuple[Optional[int], str]:
     """Proses upload file: ekstrak, ringkas via Ollama, simpan ke DB dan Chroma."""
@@ -86,8 +157,8 @@ def proses_upload(uploaded_file) -> Tuple[Optional[int], str]:
         filename = uploaded_file.name
         ext = os.path.splitext(filename)[1].lower()
 
-        if ext not in [".pdf", ".docx", ".txt", ".md"]:
-            return None, f"Format {ext} tidak didukung. Gunakan PDF, DOCX, TXT, atau MD."
+        if ext not in [".pdf", ".docx", ".txt", ".md", ".csv", ".xlsx", ".xls"]:
+            return None, f"Format {ext} tidak didukung. Gunakan PDF, DOCX, TXT, MD, CSV, atau Excel."
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
             tmp.write(uploaded_file.read())
@@ -104,6 +175,12 @@ def proses_upload(uploaded_file) -> Tuple[Optional[int], str]:
         elif ext in [".txt", ".md"]:
             teks = ekstrak_teks_dari_txt(tmp_path)
             file_type = "TXT"
+        elif ext == ".csv":
+            teks = ekstrak_teks_dari_csv(tmp_path)
+            file_type = "CSV"
+        elif ext in [".xlsx", ".xls"]:
+            teks = ekstrak_teks_dari_xlsx(tmp_path)
+            file_type = "Excel"
         else:
             return None, f"Format {ext} tidak didukung."
 
