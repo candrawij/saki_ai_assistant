@@ -13,5 +13,13 @@
     "status": "aktif",
     "priority": "normal",
     "dibuat": "2026-06-09 05:56"
+  },
+  {
+    "id": 3,
+    "isi": "testing cli, deadline besok",
+    "deadline": "2026-06-10",
+    "status": "aktif",
+    "priority": "normal",
+    "dibuat": "2026-06-09 06:29"
   }
 ]

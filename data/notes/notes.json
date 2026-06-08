@@ -18,5 +18,13 @@
     "tanggal": "2026-06-09 05:56",
     "kategori": "umum",
     "tags": []
+  },
+  {
+    "id": 4,
+    "title": "test dari cli",
+    "isi": "test dari cli",
+    "tanggal": "2026-06-09 06:29",
+    "kategori": "umum",
+    "tags": []
   }
 ]
