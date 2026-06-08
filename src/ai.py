@@ -73,7 +73,7 @@ def ringkas_teks(teks: str) -> str:
 def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
     """Chat dengan Saki, termasuk konteks fakta dan dokumen."""
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    
+
     # Tambah fakta sebagai konteks
     fakta = lihat_semua_fakta()
     if fakta:
@@ -101,6 +101,20 @@ def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
                 })
     except Exception as e:
         logger.warning(f"Document search failed (non-critical): {str(e)}")
+
+    # === AGENT ROUTER (Fase 2A) ===
+    # Cek apakah ini perintah untuk agent
+    try:
+        from src.agents.router import AgentRouter
+        router = AgentRouter()
+        agent, agent_name = router.route(pesan)  # ⬅️ pakai 'pesan' bukan 'user_message'
+        
+        if agent:
+            result = agent.execute(pesan)  # ⬅️ pakai 'pesan' bukan 'user_message'
+            return f"🤖 **{agent_name}**\n\n{result}"
+    except Exception as e:
+        # Kalau agent gagal, lanjut ke chat biasa
+        logger.debug(f"Agent routing skipped: {str(e)}")
  
     # Tambah riwayat chat
     if riwayat_chat:
