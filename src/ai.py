@@ -103,17 +103,20 @@ def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
         logger.warning(f"Document search failed (non-critical): {str(e)}")
 
     # === AGENT ROUTER (Fase 2A) ===
-    # Cek apakah ini perintah untuk agent
     try:
         from src.agents.router import AgentRouter
         router = AgentRouter()
-        agent, agent_name = router.route(pesan)  # ⬅️ pakai 'pesan' bukan 'user_message'
+        agent, routed_message = router.route(pesan)
         
-        if agent:
-            result = agent.execute(pesan)  # ⬅️ pakai 'pesan' bukan 'user_message'
-            return f"🤖 **{agent_name}**\n\n{result}"
+        if agent == "special":
+            # Special commands (screenshot, cmd, system info)
+            result = router.execute_special(routed_message)
+            return result
+        
+        if agent is not None:
+            result = agent.execute(routed_message)
+            return f"🤖 **{agent.name}**\n\n{result}"
     except Exception as e:
-        # Kalau agent gagal, lanjut ke chat biasa
         logger.debug(f"Agent routing skipped: {str(e)}")
  
     # Tambah riwayat chat
