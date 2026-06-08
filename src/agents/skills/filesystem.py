@@ -1,5 +1,5 @@
 """
-Filesystem Skills — Privacy-First, fokus ke E:\Priv Bot\data\
+Filesystem Skills — Privacy-First, fokus ke E:\PrivBot\data\
 """
 
 import os
@@ -9,22 +9,22 @@ from datetime import datetime
 # === PATH MAPPING ===
 # Path internal Saki (auto-managed)
 SAKI_DATA_PATHS = {
-    "data": "E:\\Priv Bot\\data",
-    "documents": "E:\\Priv Bot\\data\\documents",
-    "dokumen": "E:\\Priv Bot\\data\\documents",
-    "notes": "E:\\Priv Bot\\data\\notes",
-    "catatan": "E:\\Priv Bot\\data\\notes",
-    "tasks": "E:\\Priv Bot\\data\\tasks",
-    "tugas": "E:\\Priv Bot\\data\\tasks",
-    "projects": "E:\\Priv Bot\\data\\projects",
-    "proyek": "E:\\Priv Bot\\data\\projects",
-    "ringkasan": "E:\\Priv Bot\\data\\ringkasan",
-    "backups": "E:\\Priv Bot\\data\\backups",
-    "backup": "E:\\Priv Bot\\data\\backups",
-    "screenshots": "E:\\Priv Bot\\data\\screenshots",
-    "screenshot": "E:\\Priv Bot\\data\\screenshots",
-    "saki": "E:\\Priv Bot",
-    "priv bot": "E:\\Priv Bot",
+    "data": "E:\\PrivBot\\data",
+    "documents": "E:\\PrivBot\\data\\documents",
+    "dokumen": "E:\\PrivBot\\data\\documents",
+    "notes": "E:\\PrivBot\\data\\notes",
+    "catatan": "E:\\PrivBot\\data\\notes",
+    "tasks": "E:\\PrivBot\\data\\tasks",
+    "tugas": "E:\\PrivBot\\data\\tasks",
+    "projects": "E:\\PrivBot\\data\\projects",
+    "proyek": "E:\\PrivBot\\data\\projects",
+    "ringkasan": "E:\\PrivBot\\data\\ringkasan",
+    "backups": "E:\\PrivBot\\data\\backups",
+    "backup": "E:\\PrivBot\\data\\backups",
+    "screenshots": "E:\\PrivBot\\data\\screenshots",
+    "screenshot": "E:\\PrivBot\\data\\screenshots",
+    "saki": "E:\\PrivBot",
+    "PrivBot": "E:\\PrivBot",
 }
 
 # ✅ TAMBAHAN: Path eksternal yang dikenal (read-only mindset)
@@ -53,7 +53,7 @@ def resolve_path(name: str):
         if key in name_lower or name_lower == key:
             resolved = Path(path)
             # Auto-create folder di dalam data/
-            if str(resolved).startswith("E:\\Priv Bot\\data\\"):
+            if str(resolved).startswith("E:\\PrivBot\\data\\"):
                 resolved.mkdir(parents=True, exist_ok=True)
             if resolved.exists():
                 return str(resolved)
@@ -69,8 +69,8 @@ def resolve_path(name: str):
     if os.path.isabs(name) and os.path.exists(name):
         return name
     
-    # 4. Cek relative di E:\Priv Bot\data\
-    data_path = Path("E:\\Priv Bot\\data") / name
+    # 4. Cek relative di E:\PrivBot\data\
+    data_path = Path("E:\\PrivBot\\data") / name
     if data_path.exists():
         return str(data_path)
     
@@ -145,7 +145,7 @@ def buka_file(path: str):
         os.startfile(resolved)
         return True, f"📄 File dibuka: {resolved}"
     # Cek di documents Saki
-    docs = Path("E:\\Priv Bot\\data\\documents") / path
+    docs = Path("E:\\PrivBot\\data\\documents") / path
     if docs.is_file():
         os.startfile(str(docs))
         return True, f"📄 File dibuka: {docs}"
@@ -156,7 +156,7 @@ def buka_file(path: str):
 
 def cari_file(nama: str, folder: str = None):
     """Cari file berdasarkan nama."""
-    search_path = folder if folder else "E:\\Priv Bot"
+    search_path = folder if folder else "E:\\PrivBot"
     results = []
     
     try:
