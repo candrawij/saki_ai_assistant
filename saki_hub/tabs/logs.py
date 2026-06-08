@@ -80,7 +80,7 @@ class LogsTab(QWidget):
         # Auto-refresh timer
         self.timer = QTimer()
         self.timer.timeout.connect(self.load_logs)
-        self.timer.start(5000)  # Every 5 seconds
+        self.timer.start(30000)  # Every 30 seconds
         
         # Initial load
         self.load_logs()

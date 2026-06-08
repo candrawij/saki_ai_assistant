@@ -94,7 +94,7 @@ class SchedulerTab(QWidget):
         # Timer
         self.timer = QTimer()
         self.timer.timeout.connect(self.refresh_data)
-        self.timer.start(15000)  # Every 15 seconds
+        self.timer.start(30000)  # Every 30 seconds
         
         # Job cards storage
         self.job_cards = []

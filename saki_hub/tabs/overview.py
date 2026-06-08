@@ -140,7 +140,7 @@ class OverviewTab(QWidget):
         # Auto-refresh timer
         self.timer = QTimer()
         self.timer.timeout.connect(self.refresh_data)
-        self.timer.start(5000)  # 5 detik
+        self.timer.start(30000)  # 30 detik
         
         # Initial refresh
         self.refresh_data()

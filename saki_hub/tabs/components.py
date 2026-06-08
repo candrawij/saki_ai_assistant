@@ -148,7 +148,7 @@ class ComponentsTab(QWidget):
         # Refresh timer
         self.timer = QTimer()
         self.timer.timeout.connect(self.refresh_data)
-        self.timer.start(5000)
+        self.timer.start(30000)  # Refresh setiap 30 detik
         self.refresh_data()
     
     def refresh_data(self):
