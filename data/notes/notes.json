@@ -10,5 +10,13 @@
     "isi": "halo",
     "tanggal": "2026-06-08 11:12",
     "kategori": "umum"
+  },
+  {
+    "id": 3,
+    "title": "test note from unit test",
+    "isi": "test note from unit test",
+    "tanggal": "2026-06-09 05:56",
+    "kategori": "umum",
+    "tags": []
   }
 ]

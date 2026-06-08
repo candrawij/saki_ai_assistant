@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "nama": "Saki AI",
+    "status": "aktif",
+    "deskripsi": "Personal AI Ecosystem",
+    "dibuat": "2026-06-09 05:54",
+    "updated": "2026-06-09 05:54",
+    "history": [
+      {
+        "tanggal": "2026-06-09 05:54",
+        "dari": "baru",
+        "ke": "aktif"
+      }
+    ],
+    "milestones": []
+  },
+  {
+    "id": 2,
+    "nama": "Skripsi",
+    "status": "pending",
+    "deskripsi": "Tugas akhir",
+    "dibuat": "2026-06-09 05:54",
+    "updated": "2026-06-09 05:54",
+    "history": [
+      {
+        "tanggal": "2026-06-09 05:54",
+        "dari": "baru",
+        "ke": "pending"
+      }
+    ],
+    "milestones": []
+  }
+]

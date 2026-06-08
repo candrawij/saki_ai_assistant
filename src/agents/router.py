@@ -5,6 +5,7 @@ AgentRouter — Keyword + pattern routing
 import re
 from typing import Tuple, Optional
 
+
 class AgentRouter:
     def __init__(self):
         from src.agents.task_agent import TaskAgent
@@ -96,46 +97,73 @@ class AgentRouter:
                 return handler(message)
         return "❓ Perintah khusus tidak dikenali"
     
+    # ========== SPECIAL COMMAND HANDLERS ==========
+    # Semua pakai module-level functions dari skills.windows
+    
     def _handle_screenshot(self, message: str) -> str:
-        from src.agents.skills.windows import WindowsSkills
-        ws = WindowsSkills()
-        result = ws.take_screenshot()
+        """Handle screenshot command."""
+        from src.agents.skills.windows import screenshot
+        result = screenshot()
         return f"✅ Screenshot disimpan: {result}" if result else "❌ Gagal screenshot"
     
     def _handle_open_app(self, message: str) -> str:
+        """Handle open app command."""
         app_name = message.replace("buka aplikasi", "").replace("open app", "").strip()
         if not app_name:
             return "❓ Aplikasi apa? Contoh: 'buka aplikasi notepad'"
-        from src.agents.skills.windows import WindowsSkills
-        ws = WindowsSkills()
-        success = ws.open_app(app_name)
-        return f"✅ {app_name} dibuka" if success else f"❌ Gagal membuka {app_name}"
+        
+        from src.agents.skills.windows import buka_aplikasi
+        success, msg = buka_aplikasi(app_name)
+        return msg  # buka_aplikasi already returns formatted message
     
     def _handle_system_info(self, message: str) -> str:
-        from src.agents.skills.windows import WindowsSkills
-        ws = WindowsSkills()
-        info = ws.get_system_info()
-        return f"📊 Sistem: {info.get('os', 'N/A')} | {info.get('processor', 'N/A')}"
+        """Handle system info command."""
+        from src.agents.skills.windows import get_system_info
+        info = get_system_info()
+        
+        response = "📊 Informasi Sistem:\n"
+        response += f"  • OS: {info.get('os', 'N/A')} {info.get('os_version', '')}\n"
+        response += f"  • Processor: {info.get('processor', 'N/A')}\n"
+        response += f"  • User: {info.get('user', 'N/A')}\n"
+        
+        if 'ram_total_gb' in info:
+            response += f"  • RAM: {info['ram_total_gb']} GB\n"
+        if 'boot_time' in info:
+            response += f"  • Boot: {info['boot_time']}\n"
+        
+        return response
     
     def _handle_command(self, message: str) -> str:
+        """Handle shell command execution."""
         for prefix in ["cmd:", "run:"]:
             if message.lower().startswith(prefix):
                 command = message[len(prefix):].strip()
                 break
         else:
-            return "❓ Command apa?"
+            return "❓ Command apa? Contoh: 'cmd: dir'"
         
-        dangerous = ["del ", "rm ", "format", "shutdown"]
+        if not command:
+            return "❓ Command apa yang ingin dijalankan?"
+        
+        # Cek dangerous commands
+        dangerous = ["del ", "rm ", "format", "shutdown", "restart", "reg delete"]
         if any(d in command.lower() for d in dangerous):
-            return "⚠️ Command berbahaya tidak diizinkan"
+            return "⚠️ Command berbahaya tidak diizinkan untuk alasan keamanan."
         
-        from src.agents.skills.windows import WindowsSkills
-        ws = WindowsSkills()
-        result = ws.run_command(command)
-        return f"🖥️ Output:\n{result.get('stdout', '')[:500]}"
+        from src.agents.skills.windows import run_command
+        result = run_command(command)
+        
+        if not result.get("success"):
+            error = result.get("error", result.get("stderr", "Unknown error"))
+            return f"❌ Command gagal:\n{error[:300]}"
+        
+        response = f"🖥️ Command: `{command}`\n"
+        if result.get("stdout"):
+            response += f"```\n{result['stdout'][:500]}\n```"
+        return response
     
     def get_agent_info(self):
-        """Info semua agent"""
+        """Info semua agent."""
         return [
             {"name": self.task.name, "description": self.task.description},
             {"name": self.note.name, "description": self.note.description},
