@@ -2,7 +2,19 @@
 Styles — Dark theme untuk Saki Hub
 """
 
+# ========== STATUS COLORS ==========
+STATUS_COLORS = {
+    "running": "#10B981",    # Green
+    "stopped": "#EF4444",    # Red
+    "disabled": "#6B7280",   # Gray
+    "warning": "#F59E0B",    # Yellow
+    "error": "#EF4444",      # Red
+    "unknown": "#6B7280",    # Gray
+}
+
+# ========== DARK THEME ==========
 DARK_THEME = """
+/* === MAIN WINDOW === */
 QMainWindow {
     background-color: #1E1E2E;
 }
@@ -14,6 +26,7 @@ QWidget {
     font-size: 13px;
 }
 
+/* === TAB WIDGET === */
 QTabWidget::pane {
     border: 1px solid #2D2D44;
     background-color: #1E1E2E;
@@ -41,10 +54,41 @@ QTabBar::tab:hover:!selected {
     background-color: #3D3D5C;
 }
 
+/* === LABELS === */
 QLabel {
     color: #F8FAFC;
 }
 
+QLabel#title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+QLabel#subtitle {
+    font-size: 12px;
+    color: #94A3B8;
+}
+
+QLabel#value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #10B981;
+}
+
+QLabel#value-warning {
+    font-size: 28px;
+    font-weight: bold;
+    color: #F59E0B;
+}
+
+QLabel#value-error {
+    font-size: 28px;
+    font-weight: bold;
+    color: #EF4444;
+}
+
+/* === BUTTONS === */
 QPushButton {
     background-color: #7C3AED;
     color: white;
@@ -78,16 +122,26 @@ QPushButton#restartBtn:hover {
     background-color: #D97706;
 }
 
+QPushButton#startBtn {
+    background-color: #10B981;
+}
+
+QPushButton#startBtn:hover {
+    background-color: #059669;
+}
+
 QPushButton#quickBtn {
     background-color: #2D2D44;
     border: 1px solid #3D3D5C;
     padding: 12px;
+    font-weight: normal;
 }
 
 QPushButton#quickBtn:hover {
     background-color: #3D3D5C;
 }
 
+/* === GROUP BOX === */
 QGroupBox {
     border: 1px solid #2D2D44;
     border-radius: 8px;
@@ -102,6 +156,7 @@ QGroupBox::title {
     color: #94A3B8;
 }
 
+/* === TEXT EDIT (LOG VIEWER) === */
 QTextEdit, QPlainTextEdit {
     background-color: #0F0F1A;
     color: #E2E8F0;
@@ -112,20 +167,34 @@ QTextEdit, QPlainTextEdit {
     font-size: 12px;
 }
 
+/* === SCROLL BAR === */
 QScrollBar:vertical {
     background-color: #1E1E2E;
     width: 10px;
+    border-radius: 5px;
 }
 
 QScrollBar::handle:vertical {
     background-color: #3D3D5C;
     border-radius: 5px;
+    min-height: 20px;
 }
 
 QScrollBar::handle:vertical:hover {
     background-color: #4D4D6C;
 }
 
+QScrollBar:horizontal {
+    background-color: #1E1E2E;
+    height: 10px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #3D3D5C;
+    border-radius: 5px;
+}
+
+/* === PROGRESS BAR === */
 QProgressBar {
     border: none;
     background-color: #2D2D44;
@@ -139,6 +208,7 @@ QProgressBar::chunk {
     border-radius: 10px;
 }
 
+/* === COMBO BOX === */
 QComboBox {
     background-color: #2D2D44;
     color: #F8FAFC;
@@ -157,6 +227,7 @@ QComboBox QAbstractItemView {
     selection-background-color: #7C3AED;
 }
 
+/* === CHECKBOX === */
 QCheckBox {
     spacing: 8px;
 }
@@ -172,13 +243,36 @@ QCheckBox::indicator:checked {
     background-color: #7C3AED;
     border-color: #7C3AED;
 }
+
+/* === LINE EDIT === */
+QLineEdit {
+    background-color: #2D2D44;
+    color: #F8FAFC;
+    border: 1px solid #3D3D5C;
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+
+QLineEdit:focus {
+    border-color: #7C3AED;
+}
+
+/* === SPIN BOX === */
+QSpinBox {
+    background-color: #2D2D44;
+    color: #F8FAFC;
+    border: 1px solid #3D3D5C;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+/* === STATUS BAR === */
+QStatusBar {
+    background-color: #16213e;
+    border-top: 1px solid #2D2D44;
+    color: #94A3B8;
+}
 """
 
-STATUS_COLORS = {
-    "running": "#10B981",
-    "stopped": "#EF4444",
-    "disabled": "#6B7280",
-    "warning": "#F59E0B",
-    "error": "#EF4444",
-    "unknown": "#6B7280",
-}
+# ========== STYLE SHEET (alias untuk kompatibilitas) ==========
+STYLE_SHEET = DARK_THEME
