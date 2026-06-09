@@ -13,6 +13,7 @@ import logging
 from typing import Optional, List, Tuple, Dict
 import datetime
 import os
+import time
 
 logger = logging.getLogger("saki")
 
@@ -30,6 +31,13 @@ from src.database import (
     hapus_fakta, cek_fakta_duplikat, track_access, tandai_fakta_reflected,
     ambil_fakta_belum_reflected, get_facts_for_timeline,
     cari_dokumen_semantik, lihat_semua_dokumen
+)
+
+# Import audit pipeline
+from src.audit_pipeline import (
+    start_audit_request, get_current_metrics, search_memory, search_reflections,
+    search_timeline, search_documents, search_chroma, build_prompt,
+    audit_ollama_chat, generate_audit_report, count_tokens
 )
 
 # ========== SYSTEM PROMPT ==========
@@ -59,85 +67,162 @@ Saat merangkum, gunakan format:
 
 # ========== FUNGSI AI DASAR ==========
 def ringkas_teks(teks: str) -> str:
-    """Meringkas teks panjang."""
+    """Meringkas teks panjang dengan audit timing."""
     try:
-        response = ollama.chat(model=MODEL, messages=[
+        metrics = get_current_metrics()
+        if metrics:
+            metrics.mark_start("ringkas_teks")
+        
+        start = time.time()
+        
+        # Count input tokens
+        input_tokens = count_tokens(teks)
+        logger.info(f"📝 ringkas_teks input: {input_tokens} tokens")
+        
+        # Build messages
+        messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": f"Ringkas teks berikut:\n\n{teks}"}
-        ])
-        return response["message"]["content"]
+        ]
+        
+        # Log before sending
+        total_tokens = count_tokens(SYSTEM_PROMPT) + input_tokens
+        logger.info(f"📤 Sending to Qwen for summarization")
+        logger.info(f"   └─ Total tokens: {total_tokens}")
+        print(f"📝 Summarizing text ({total_tokens} tokens)...")
+        
+        response = ollama.chat(model=MODEL, messages=messages)
+        result = response["message"]["content"]
+        
+        output_tokens = count_tokens(result)
+        duration = time.time() - start
+        
+        if metrics:
+            metrics.mark_end("ringkas_teks")
+            metrics.set_token_count("ringkas_teks_input", total_tokens)
+            metrics.set_token_count("ringkas_teks_output", output_tokens)
+        
+        logger.info(f"✅ ringkas_teks completed in {duration:.3f}s")
+        logger.info(f"   ├─ Output tokens: {output_tokens}")
+        logger.info(f"   └─ Compression ratio: {len(teks)}/{len(result)} = {len(teks)/len(result):.2f}x")
+        
+        return result
     except Exception as e:
         logger.error(f"Summarization failed: {str(e)}", exc_info=True)
+        if metrics:
+            metrics.mark_end("ringkas_teks")
         return f"Maaf, gagal meringkas: {type(e).__name__}"
 
 def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
-    """Chat dengan Saki, termasuk konteks fakta dan dokumen."""
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-
-    # Tambah fakta sebagai konteks
-    fakta = lihat_semua_fakta()
-    if fakta:
-        fakta_text = "\n".join([f"- [{f[1]}] {f[2]}" for f in fakta if f[4] >= MIN_CONFIDENCE_THRESHOLD])
-        if fakta_text:
-            messages.append({"role": "system", "content": f"Info tentang user:\n{fakta_text}"})
-        # Track akses
-        for f in fakta:
-            if f[5] >= MIN_IMPORTANCE_FOR_TRACKING:
-                track_access(f[0])
+    """Chat dengan Saki, termasuk konteks fakta dan dokumen.
+    
+    Dengan Audit Pipeline:
+    - Timing untuk setiap operasi search
+    - Token counting sebelum kirim ke Qwen
+    - Performance monitoring
+    """
+    # Mulai audit request
+    metrics = start_audit_request()
     
     try:
-        dokumen_relevan = cari_dokumen_semantik(pesan, n_results=3)
-        if dokumen_relevan:
-            docs_text = []
-            for doc in dokumen_relevan:
-                nama = doc[1]  # filename
-                ringkasan = doc[4] if doc[4] else "Tidak ada ringkasan"
-                docs_text.append(f"📄 {nama}\n{ringkasan[:300]}")
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+        # Tambah fakta sebagai konteks (dengan timing)
+        fakta = search_memory()
+        if fakta:
+            fakta_text = "\n".join([f"- [{f[1]}] {f[2]}" for f in fakta if f[4] >= MIN_CONFIDENCE_THRESHOLD])
+            if fakta_text:
+                messages.append({"role": "system", "content": f"Info tentang user:\n{fakta_text}"})
+            # Track akses
+            for f in fakta:
+                if f[5] >= MIN_IMPORTANCE_FOR_TRACKING:
+                    track_access(f[0])
+        
+        # Cari dokumen relevan dengan timing
+        try:
+            dokumen_relevan = search_chroma(pesan, n_results=3)
+            if dokumen_relevan:
+                docs_text = []
+                for doc in dokumen_relevan:
+                    nama = doc[1]  # filename
+                    ringkasan = doc[4] if doc[4] else "Tidak ada ringkasan"
+                    docs_text.append(f"📄 {nama}\n{ringkasan[:300]}")
+                
+                if docs_text:
+                    messages.append({
+                        "role": "system",
+                        "content": "Dokumen yang relevan dengan pertanyaan user:\n\n" + "\n\n".join(docs_text)
+                    })
+        except Exception as e:
+            logger.warning(f"Document search failed (non-critical): {str(e)}")
+
+        # === AGENT ROUTER (Fase 2A) ===
+        try:
+            from src.agents.router import AgentRouter
+            router = AgentRouter()
+            agent, routed_message = router.route(pesan)
             
-            if docs_text:
-                messages.append({
-                    "role": "system",
-                    "content": "Dokumen yang relevan dengan pertanyaan user:\n\n" + "\n\n".join(docs_text)
-                })
-    except Exception as e:
-        logger.warning(f"Document search failed (non-critical): {str(e)}")
-
-    # === AGENT ROUTER (Fase 2A) ===
-    try:
-        from src.agents.router import AgentRouter
-        router = AgentRouter()
-        agent, routed_message = router.route(pesan)
+            if agent == "special":
+                # Special commands (screenshot, cmd, system info)
+                result = router.execute_special(routed_message)
+                return result
+            
+            if agent is not None:
+                result = agent.execute(routed_message)
+                return f"🤖 **{agent.name}**\n\n{result}"
+        except Exception as e:
+            logger.debug(f"Agent routing skipped: {str(e)}")
+     
+        # Tambah riwayat chat
+        if riwayat_chat:
+            for msg in riwayat_chat[-10:]:
+                messages.append(msg)
         
-        if agent == "special":
-            # Special commands (screenshot, cmd, system info)
-            result = router.execute_special(routed_message)
-            return result
+        messages.append({"role": "user", "content": pesan})
         
-        if agent is not None:
-            result = agent.execute(routed_message)
-            return f"🤖 **{agent.name}**\n\n{result}"
-    except Exception as e:
-        logger.debug(f"Agent routing skipped: {str(e)}")
- 
-    # Tambah riwayat chat
-    if riwayat_chat:
-        for msg in riwayat_chat[-10:]:
-            messages.append(msg)
-    
-    messages.append({"role": "user", "content": pesan})
-    
-    try:
-        response = ollama.chat(model=MODEL, messages=messages)
+        # BUILD PROMPT dengan audit dan token counting
+        prompt_audit = build_prompt(SYSTEM_PROMPT, messages)
+        token_count = prompt_audit['token_count']
+        
+        # AUDIT LOG: Print token count sebelum kirim ke Qwen
+        logger.info(f"✅ PROMPT READY TO SEND TO QWEN")
+        logger.info(f"   ├─ Prompt length: {prompt_audit['char_count']} characters")
+        logger.info(f"   └─ Token count: {token_count}")
+        
+        print(f"\n{'='*70}")
+        print(f"✅ READY TO SEND TO QWEN")
+        print(f"{'='*70}")
+        print(f"Prompt length: {prompt_audit['char_count']} characters")
+        print(f"Token count: {token_count}")
+        print(f"{'='*70}\n")
+        
+        # Send to Qwen dengan audit
+        response = audit_ollama_chat(model=MODEL, messages=prompt_audit['messages'], audit_name="ollama.chat_main")
+        
+        # Log audit report
+        report = generate_audit_report(metrics)
+        logger.info(report)
+        print(report)
+        
         return response["message"]["content"]
+    
     except Exception as e:
         logger.error(f"Chat failed: {str(e)}", exc_info=True)
+        # Log audit report meskipun error
+        if metrics:
+            report = generate_audit_report(metrics)
+            logger.error(f"Error occurred during chat:\n{report}")
         return f"Maaf, terjadi kesalahan: {type(e).__name__}"
 
 # ========== AUTO-EXTRACTION ==========
 def auto_ekstrak_fakta(pesan_user: str, riwayat_chat: List[Dict] = None) -> Optional[Dict]:
-    """Ekstrak fakta penting dari pesan user."""
+    """Ekstrak fakta penting dari pesan user dengan audit timing."""
     if len(pesan_user.split()) < 3:
         return None
+    
+    metrics = get_current_metrics()
+    if metrics:
+        metrics.mark_start("auto_ekstrak_fakta")
     
     konteks = ""
     if riwayat_chat and len(riwayat_chat) >= 2:
@@ -174,10 +259,16 @@ Jawab JSON saja:
 Jika ragu, pilih false."""
 
     try:
+        prompt_tokens = count_tokens(prompt)
+        logger.debug(f"📤 auto_ekstrak_fakta sending to Qwen ({prompt_tokens} tokens)")
+        
+        start = time.time()
         response = ollama.chat(model=MODEL, messages=[
             {"role": "system", "content": "Kamu adalah filter fakta yang KETAT. Jawab HANYA JSON."},
             {"role": "user", "content": prompt}
         ])
+        duration = time.time() - start
+        
         hasil = response["message"]["content"].strip()
         if hasil.startswith("```"):
             hasil = hasil.split("\n", 1)[1].rstrip("```")
@@ -188,6 +279,11 @@ Jika ragu, pilih false."""
         # Debug: log hasil AI
         logger.debug(f"Auto-extract raw response: {hasil[:200]}")
         logger.debug(f"Auto-extract parsed: is_fact={data.get('is_fact')}, confidence={data.get('confidence')}")
+        logger.info(f"⏱️  auto_ekstrak_fakta: {duration:.3f}s")
+        
+        if metrics:
+            metrics.mark_end("auto_ekstrak_fakta")
+            metrics.set_token_count("auto_ekstrak_fakta", prompt_tokens)
         
         if data.get("is_fact") and data.get("confidence", 0) >= AUTO_EXTRACT_THRESHOLD:
             logger.info(f"Auto-extract ACCEPTED: [{data.get('category')}] {data.get('fact')} (conf={data.get('confidence')})")
@@ -207,14 +303,22 @@ Jika ragu, pilih false."""
         
     except json.JSONDecodeError as e:
         logger.warning(f"Auto-extract JSON parse failed: {str(e)} | raw: {hasil[:100] if 'hasil' in locals() else 'N/A'}")
+        if metrics:
+            metrics.mark_end("auto_ekstrak_fakta")
         return None
     except Exception as e:
         logger.error(f"Auto-extract failed: {type(e).__name__}: {str(e)}", exc_info=True)
+        if metrics:
+            metrics.mark_end("auto_ekstrak_fakta")
         return None
 
 # ========== IMPORTANCE RATING ==========
 def auto_rate_importance(content: str, category: str) -> int:
-    """AI menilai importance dari sebuah fakta (1-10)."""
+    """AI menilai importance dari sebuah fakta (1-10) dengan audit timing."""
+    metrics = get_current_metrics()
+    if metrics:
+        metrics.mark_start("auto_rate_importance")
+    
     prompt = f"""Nilai seberapa PENTING fakta ini untuk diingat. HANYA beri angka 1-10.
 
 PEDOMAN SKOR:
@@ -230,11 +334,22 @@ KATEGORI: {category}
 Jawab HANYA satu angka. Contoh: 8"""
 
     try:
+        prompt_tokens = count_tokens(prompt)
+        logger.debug(f"📤 auto_rate_importance sending to Qwen ({prompt_tokens} tokens)")
+        
+        start = time.time()
         response = ollama.chat(model=MODEL, messages=[
             {"role": "system", "content": "Jawab HANYA satu angka 1-10."},
             {"role": "user", "content": prompt}
         ])
+        duration = time.time() - start
+        
         hasil = response["message"]["content"].strip()
+        logger.info(f"⏱️  auto_rate_importance: {duration:.3f}s")
+        
+        if metrics:
+            metrics.mark_end("auto_rate_importance")
+            metrics.set_token_count("auto_rate_importance", prompt_tokens)
         
         match = re.search(r'\b(10|[1-9])\b', hasil)
         if match:
@@ -248,6 +363,8 @@ Jawab HANYA satu angka. Contoh: 8"""
         return fallback.get(category, 5)
     except Exception as e:
         logger.error(f"Auto-rate importance failed: {str(e)}", exc_info=True)
+        if metrics:
+            metrics.mark_end("auto_rate_importance")
         return 5
 
 # ========== MERGE ==========
@@ -325,17 +442,23 @@ Jika tidak ada, jawab []."""
 
 # ========== REFLECTION (V5) ==========
 def generate_reflection() -> Tuple[List[Dict], str]:
-    """Analisis fakta, hasilkan insight."""
-    fakta = ambil_fakta_belum_reflected()
+    """Analisis fakta, hasilkan insight dengan audit timing."""
+    metrics = start_audit_request()
     
-    if len(fakta) < 3:
-        return [], f"Butuh minimal 3 fakta baru. Saat ini: {len(fakta)}"
-    
-    logger.info(f"Generating reflection for {len(fakta)} unreflected facts")
-    
-    fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
-    
-    prompt = f"""Analisis fakta-fakta berikut. HANYA kelompokkan yang BENAR-BENAR terkait secara makna.
+    try:
+        metrics.mark_start("generate_reflection")
+        
+        # Search unreflected facts
+        fakta = ambil_fakta_belum_reflected()
+        
+        if len(fakta) < 3:
+            return [], f"Butuh minimal 3 fakta baru. Saat ini: {len(fakta)}"
+        
+        logger.info(f"Generating reflection for {len(fakta)} unreflected facts")
+        
+        fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
+        
+        prompt = f"""Analisis fakta-fakta berikut. HANYA kelompokkan yang BENAR-BENAR terkait secara makna.
 
 {fakta_text}
 
@@ -350,11 +473,23 @@ Output JSON array:
 [{{"title": "Judul", "content": "Isi insight", "source_ids": [1,3], "category": "proyek/pembelajaran/preferensi/umum"}}]
 Jika tidak ada, jawab []."""
 
-    try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Kamu sistem analisis pengetahuan. Jawab HANYA JSON array."},
-            {"role": "user", "content": prompt}
-        ])
+        # Token counting
+        prompt_tokens = count_tokens(prompt)
+        logger.info(f"📤 generate_reflection sending to Qwen")
+        logger.info(f"   └─ Prompt tokens: {prompt_tokens}")
+        print(f"🧠 Generating reflection ({prompt_tokens} tokens)...")
+        
+        start = time.time()
+        response = audit_ollama_chat(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": "Kamu sistem analisis pengetahuan. Jawab HANYA JSON array."},
+                {"role": "user", "content": prompt}
+            ],
+            audit_name="generate_reflection_ollama"
+        )
+        duration = time.time() - start
+        
         raw = response["message"]["content"].strip()
         logger.debug(f"Reflection raw: {raw[:300]}")
         
@@ -375,14 +510,23 @@ Jika tidak ada, jawab []."""
         if len(insights) == 0:
             return [], "Tidak ada pengelompokan yang bisa dibuat."
         
-        logger.info(f"Reflection generated {len(insights)} insights")
+        metrics.mark_end("generate_reflection")
+        logger.info(f"✅ Reflection generated {len(insights)} insights in {duration:.3f}s")
+        
+        # Log audit report
+        report = generate_audit_report(metrics)
+        logger.info(report)
+        print(report)
+        
         return insights, ""
     
     except json.JSONDecodeError as e:
         logger.error(f"Reflection JSON parse failed: {str(e)}")
+        metrics.mark_end("generate_reflection")
         return [], f"Gagal memproses hasil AI. Coba lagi."
     except Exception as e:
         logger.error(f"Reflection failed: {str(e)}", exc_info=True)
+        metrics.mark_end("generate_reflection")
         return [], f"Gagal generate reflection: {type(e).__name__}"
 
 def save_reflections(insights: List[Dict]) -> int:
