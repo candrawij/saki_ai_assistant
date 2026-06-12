@@ -205,15 +205,25 @@ def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
         # DEBUG
         logger.info(f"Plugin registry: {len(pm.get_all())} plugins, {len(pm.get_enabled())} enabled")
 
-        result = pm.find_handler(pesan)
-        if result:
-            plugin, cmd = result
-            response = plugin.execute(cmd["handler"])
+        msg_lower = pesan.lower()
+        best_match = None
+        best_keyword_len = 0
+        
+        for plugin in pm.get_enabled():
+            for cmd in plugin.get_commands():
+                keywords = cmd.get("keywords", [])
+                for kw in keywords:
+                    if kw in msg_lower:
+                        # Pilih keyword terpanjang (lebih spesifik)
+                        if len(kw) > best_keyword_len:
+                            best_match = (plugin, cmd)
+                            best_keyword_len = len(kw)
+        
+        if best_match:
+            plugin, cmd = best_match
+            response = plugin.execute(cmd["handler"], pesan)
             if response:
                 return f"{plugin.icon} **{plugin.name}**\n\n{response}"
-        else:
-            logger.info(f"No plugin handler for: {pesan[:50]}")
-            
     except Exception as e:
         logger.debug(f"Plugin check skipped: {str(e)}")
     
