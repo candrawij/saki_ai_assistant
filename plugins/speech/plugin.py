@@ -1,6 +1,6 @@
 """
 Speech Recognition Plugin
-Voice input untuk Saki
+Voice input untuk Saki — dengan auto-routing ke Agent
 """
 
 import threading
@@ -16,49 +16,41 @@ class Plugin(BasePlugin):
     
     @property
     def description(self) -> str:
-        return "Voice input menggunakan speech recognition"
+        return "Voice input dengan auto-routing ke Agent"
     
     @property
     def version(self) -> str:
-        return "0.1.0"
+        return "0.2.0"
     
     @property
     def icon(self) -> str:
         return "🎤"
     
     def on_enable(self) -> bool:
-        """Check dependencies — jangan gagal kalau gak ada mic."""
         try:
             import speech_recognition as sr
             self.recognizer = sr.Recognizer()
             self.is_listening = False
             
-            # Cek mic — tapi jangan gagal
             try:
                 self.microphone = sr.Microphone()
             except:
                 self.microphone = None
-                print("⚠️ No microphone detected. Speech recognition will use default.")
             
             return True
         except ImportError:
-            print("SpeechRecognition not installed.")
-            return False
-        except Exception as e:
-            print(f"Speech init error: {e}")
             return False
     
     def on_disable(self):
-        """Stop listening."""
         self.is_listening = False
     
     def get_commands(self) -> list:
         return [
             {
                 "name": "speech_start",
-                "description": "Mulai mendengarkan suara",
-                "keywords": ["dengarkan", "listen", "speech", "suara", "bicara"],
-                "handler": "start_listening",
+                "description": "Mulai mendengarkan suara dan proses perintah",
+                "keywords": ["dengarkan", "listen", "speech", "suara", "bicara", "voice"],
+                "handler": "listen_and_process",
             },
             {
                 "name": "speech_stop",
@@ -69,34 +61,70 @@ class Plugin(BasePlugin):
         ]
     
     def execute(self, command: str, args=None) -> str:
-        if command == "start_listening":
-            return self._listen_once()
+        if command == "listen_and_process":
+            result_parts = []
+            for part in self._listen_and_process():
+                result_parts.append(part)
+            return "\n".join(result_parts)
         elif command == "stop_listening":
             self.is_listening = False
             return "🛑 Berhenti mendengarkan."
         return "❓ Perintah tidak dikenal."
     
-    def _listen_once(self) -> str:
-        """Dengarkan satu kali."""
+    def _listen_and_process(self):
+        """Dengarkan dan proses dengan Agent Router."""
         try:
             import speech_recognition as sr
             
-            with self.microphone as source:
+            mic = self.microphone or sr.Microphone()
+            
+            with mic as source:
+                # Adjust noise
+                yield "🎤 Menyesuaikan dengan suara sekitar..."
                 self.recognizer.adjust_for_ambient_noise(source, duration=1)
-                print("🎤 Mendengarkan...")
+                
+                # Listen
+                yield "🎤 **Mendengarkan...** _(bicara sekarang, max 10 detik)_"
                 
                 try:
                     audio = self.recognizer.listen(source, timeout=5, phrase_time_limit=10)
                     text = self.recognizer.recognize_google(audio, language="id-ID")
-                    return f"🎤 Terdengar: \"{text}\""
+                    
+                    yield f"🎤 **Terdengar:** \"{text}\""
+                    yield ""
+                    yield self._route_to_agent(text)
+                    
                 except sr.WaitTimeoutError:
-                    return "⏰ Tidak ada suara terdeteksi."
+                    yield "⏰ Tidak ada suara terdeteksi (5 detik)."
                 except sr.UnknownValueError:
-                    return "❓ Tidak bisa memahami suara."
+                    yield "❓ Tidak bisa memahami suara. Coba lagi dengan suara lebih jelas."
                 except sr.RequestError:
-                    return "🌐 Gagal connect ke Google Speech (butuh internet)."
+                    yield "🌐 Butuh koneksi internet untuk Google Speech Recognition."
         
         except ImportError:
-            return "📦 Install SpeechRecognition dulu: pip install SpeechRecognition pyaudio"
+            yield "📦 Package belum terinstall. Run: `pip install SpeechRecognition pyaudio`"
         except Exception as e:
-            return f"❌ Error: {str(e)}"
+            yield f"❌ Error: {str(e)}"
+    
+    def _route_to_agent(self, text: str) -> str:
+        """
+        Auto-route hasil speech ke Agent yang sesuai.
+        Kalau bukan perintah agent, kirim sebagai chat biasa.
+        """
+        try:
+            from src.agents.router import AgentRouter
+            router = AgentRouter()
+            agent, routed_message = router.route(text)
+            
+            if agent == "special":
+                return f"🤖 **Special**\n\n{router.execute_special(text)}"
+            
+            if agent is not None:
+                result = agent.execute(text)
+                return f"🤖 **{agent.name}**\n\n{result}"
+            
+            # Bukan perintah agent — beri tahu user
+            return f"💬 \"{text}\"\n\n✅ Suara terdengar! Kirim sebagai chat untuk diproses AI."
+        
+        except Exception as e:
+            return f"⚠️ Gagal routing: {str(e)}"

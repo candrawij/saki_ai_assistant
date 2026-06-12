@@ -213,7 +213,16 @@ if st.session_state.authenticated:
             with st.chat_message(msg["role"]):
                 st.write(msg["content"])
         
-        if prompt := st.chat_input("Ketik pesan..."):
+        col1, col2 = st.columns([10, 1])
+
+        with col1:
+            prompt = st.chat_input("Ketik pesan atau klik 🎤 untuk voice...")
+
+        with col2:
+            if st.button("🎤", help="Voice Input — bicara setelah klik", use_container_width=True, key="voice_btn"):
+                prompt = "dengarkan suara"
+
+        if prompt:
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             simpan_chat("USER", prompt)
             
@@ -236,12 +245,9 @@ if st.session_state.authenticated:
                     try:
                         hasil = auto_ekstrak_fakta(pesan, history)
                         if hasil:
-                            # Cek duplikat dulu
                             existing = cek_fakta_duplikat(hasil["fact"])
                             if not existing:
-                                # Auto-rate importance
                                 importance = auto_rate_importance(hasil["fact"], hasil["category"])
-                                
                                 simpan_fakta(
                                     hasil["category"],
                                     hasil["fact"],
@@ -255,7 +261,6 @@ if st.session_state.authenticated:
                     except Exception as e:
                         logger.warning(f"Background extract failed: {e}")
 
-                # Jalankan di background — jangan blocking
                 threading.Thread(
                     target=extract_background,
                     args=(prompt, st.session_state.chat_history),
