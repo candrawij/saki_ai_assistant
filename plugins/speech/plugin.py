@@ -27,15 +27,22 @@ class Plugin(BasePlugin):
         return "🎤"
     
     def on_enable(self) -> bool:
-        """Check dependencies."""
+        """Check dependencies — jangan gagal kalau gak ada mic."""
         try:
             import speech_recognition as sr
             self.recognizer = sr.Recognizer()
-            self.microphone = sr.Microphone()
             self.is_listening = False
+            
+            # Cek mic — tapi jangan gagal
+            try:
+                self.microphone = sr.Microphone()
+            except:
+                self.microphone = None
+                print("⚠️ No microphone detected. Speech recognition will use default.")
+            
             return True
         except ImportError:
-            print("SpeechRecognition not installed. Run: pip install SpeechRecognition pyaudio")
+            print("SpeechRecognition not installed.")
             return False
         except Exception as e:
             print(f"Speech init error: {e}")

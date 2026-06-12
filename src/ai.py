@@ -195,7 +195,27 @@ def ringkas_teks(teks: str) -> str:
 
 
 def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
-    """Chat dengan Saki — pakai Model Router + Agent Router."""
+    """Chat dengan Saki — pakai Model Router + Agent Router + Plugin System."""
+
+    # === PLUGIN CHECK ===
+    try:
+        from plugins.loader import get_plugin_manager
+        pm = get_plugin_manager()
+
+        # DEBUG
+        logger.info(f"Plugin registry: {len(pm.get_all())} plugins, {len(pm.get_enabled())} enabled")
+
+        result = pm.find_handler(pesan)
+        if result:
+            plugin, cmd = result
+            response = plugin.execute(cmd["handler"])
+            if response:
+                return f"{plugin.icon} **{plugin.name}**\n\n{response}"
+        else:
+            logger.info(f"No plugin handler for: {pesan[:50]}")
+            
+    except Exception as e:
+        logger.debug(f"Plugin check skipped: {str(e)}")
     
     # === AGENT ROUTER CHECK ===
     try:

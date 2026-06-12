@@ -49,6 +49,24 @@ from src.files import (
     ekstrak_teks_dari_pdf, ekstrak_teks_dari_docx, ekstrak_teks_dari_txt, proses_upload
 )
 
+# Auto-load plugins
+from plugins.loader import load_all_plugins, get_plugin_manager
+
+if "plugin_manager" not in st.session_state:
+    plugin_manager = load_all_plugins()
+    
+    # ✅ Auto-enable semua plugin
+    for plugin in plugin_manager.get_all():
+        success = plugin_manager.enable(plugin.name)
+        status = "✅" if success else "⚠️"
+        print(f"   {status} {plugin.icon} {plugin.name} ({plugin.status.value})")
+    
+    st.session_state.plugin_manager = plugin_manager
+    
+    enabled = len(plugin_manager.get_enabled())
+    total = plugin_manager.get_stats()['total']
+    print(f"🔌 {enabled}/{total} plugins enabled")
+
 # ========== SETUP LOGGING ==========
 
 LOGS_FOLDER = Path(os.getenv("LOGS_FOLDER", "logs"))

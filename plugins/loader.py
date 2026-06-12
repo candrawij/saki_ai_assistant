@@ -78,8 +78,11 @@ def load_all_plugins() -> PluginRegistry:
         if item.is_dir() and not item.name.startswith("_") and not item.name.startswith("__"):
             loaded = load_plugin_from_path(item)
             for plugin in loaded:
-                _registry.register(plugin)
+                if not _registry.get(plugin.name):
+                    _registry.register(plugin)
     
-    logger.info(f"Plugin system initialized: {_registry.get_stats()['total']} plugins found")
+    if not hasattr(load_all_plugins, "_logged"):
+        logger.info(f"Plugin system initialized: {_registry.get_stats()['total']} plugins found")
+        load_all_plugins._logged = True
     
     return _registry

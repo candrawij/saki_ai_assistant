@@ -1,0 +1,1 @@
+"""OCR Struk Plugin"""
