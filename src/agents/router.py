@@ -21,12 +21,15 @@ class AgentRouter:
         # Special commands handler
         self.special_keywords = {
             "screenshot": self._handle_screenshot,
+            "lakukan screenshot": self._handle_screenshot,
+            "ambil screenshot": self._handle_screenshot,
             "tangkapan layar": self._handle_screenshot,
             "ss": self._handle_screenshot,
             "buka aplikasi": self._handle_open_app,
             "open app": self._handle_open_app,
             "info sistem": self._handle_system_info,
             "system info": self._handle_system_info,
+            "sistem info": self._handle_system_info,
             "cmd:": self._handle_command,
             "run:": self._handle_command,
         }
