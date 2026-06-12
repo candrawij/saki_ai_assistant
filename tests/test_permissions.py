@@ -57,11 +57,15 @@ def test_action_mapping():
 
 def test_evidence_tracking():
     """Test evidence recording."""
+    import random
     et = EvidenceTracker()
+
+    # Pakai ID random biar gak conflict dengan data lama
+    test_id = random.randint(10000, 99999)
     
     # Record evidence
     evidence = et.record(
-        fact_id=1,
+        fact_id=test_id,
         observer="kamu",
         perspective="internal",
         source_type="manual",
@@ -70,37 +74,43 @@ def test_evidence_tracking():
         agent_usable=True,
     )
     
-    assert evidence["fact_id"] == 1
+    assert evidence["fact_id"] == test_id
     assert evidence["observer"] == "kamu"
     assert evidence["confidence"] == 0.9
+    assert evidence["validation_count"] == 1
     
     # Get evidence
-    retrieved = et.get_evidence(1)
+    retrieved = et.get_evidence(test_id)
     assert retrieved is not None
     assert retrieved["observer"] == "kamu"
     
     # Validate
-    et.validate(1, new_confidence=0.95)
-    updated = et.get_evidence(1)
+    current_count = retrieved["validation_count"]
+    et.validate(test_id, new_confidence=0.95)
+    updated = et.get_evidence(test_id)
     assert updated["confidence"] == 0.95
-    assert updated["validation_count"] == 2
+    assert updated["validation_count"] == current_count + 1
     
     print("✅ Evidence tracking OK")
 
 
 def test_shareable_facts():
     """Test shareable facts filtering."""
+    import random
     et = EvidenceTracker()
+
+    id_a = random.randint(10000, 99999)
+    id_b = random.randint(10000, 99999)
     
     # Record shareable fact
-    et.record(fact_id=10, observer="kamu", shareable=True)
+    et.record(fact_id=id_a, observer="kamu", shareable=True)
     
     # Record private fact
-    et.record(fact_id=11, observer="kamu", shareable=False)
+    et.record(fact_id=id_b, observer="kamu", shareable=False)
     
     shareable = et.get_shareable_facts()
-    assert 10 in shareable
-    assert 11 not in shareable
+    assert id_a in shareable
+    assert id_b not in shareable
     
     print("✅ Shareable facts OK")
 
@@ -110,6 +120,7 @@ def test_delegation():
     pm = PermissionManager()
     
     # Default: delegasi disabled
+    pm.enable_delegation(False)
     assert pm.is_delegation_enabled() == False
     assert pm.can_delegate_action("chat") == False
     
@@ -122,6 +133,8 @@ def test_delegation():
     # Cek signature
     assert "[Dibalas oleh Saki]" in pm.get_delegation_signature()
     
+    pm.enable_delegation(False)
+
     print("✅ Delegation OK")
 
 

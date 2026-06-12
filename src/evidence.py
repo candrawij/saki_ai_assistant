@@ -92,10 +92,9 @@ class EvidenceTracker:
         
         key = str(fact_id)
         if key in self.evidences:
-            # Update existing — tambah history
             old = self.evidences[key]
             evidence["history"] = old.get("history", []) + evidence["history"]
-            evidence["validation_count"] = old.get("validation_count", 0) + 1
+            evidence["validation_count"] = old.get("validation_count", 0)
         
         self.evidences[key] = evidence
         self._save()

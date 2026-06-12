@@ -1,6 +1,6 @@
 {
-  "1": {
-    "fact_id": 1,
+  "34653": {
+    "fact_id": 34653,
     "observer": "kamu",
     "perspective": "internal",
     "source_chat_id": null,
@@ -8,25 +8,25 @@
     "confidence": 0.95,
     "shareable": false,
     "agent_usable": true,
-    "created_at": "2026-06-12T15:17:01.019164",
-    "last_validated": "2026-06-12T15:17:01.020168",
+    "created_at": "2026-06-12T15:37:03.436920",
+    "last_validated": "2026-06-12T15:37:03.437919",
     "validation_count": 2,
     "expiry": null,
     "history": [
       {
         "action": "created",
-        "timestamp": "2026-06-12T15:17:01.019164",
+        "timestamp": "2026-06-12T15:37:03.436920",
         "detail": "Recorded by kamu (internal)"
       },
       {
         "action": "validated",
-        "timestamp": "2026-06-12T15:17:01.020168",
+        "timestamp": "2026-06-12T15:37:03.437919",
         "detail": "Confidence: 0.95"
       }
     ]
   },
-  "10": {
-    "fact_id": 10,
+  "84181": {
+    "fact_id": 84181,
     "observer": "kamu",
     "perspective": "internal",
     "source_chat_id": null,
@@ -34,20 +34,20 @@
     "confidence": 1.0,
     "shareable": true,
     "agent_usable": true,
-    "created_at": "2026-06-12T15:17:01.027367",
-    "last_validated": "2026-06-12T15:17:01.027367",
+    "created_at": "2026-06-12T15:37:03.444907",
+    "last_validated": "2026-06-12T15:37:03.444907",
     "validation_count": 1,
     "expiry": null,
     "history": [
       {
         "action": "created",
-        "timestamp": "2026-06-12T15:17:01.027367",
+        "timestamp": "2026-06-12T15:37:03.444907",
         "detail": "Recorded by kamu (internal)"
       }
     ]
   },
-  "11": {
-    "fact_id": 11,
+  "36301": {
+    "fact_id": 36301,
     "observer": "kamu",
     "perspective": "internal",
     "source_chat_id": null,
@@ -55,14 +55,14 @@
     "confidence": 1.0,
     "shareable": false,
     "agent_usable": true,
-    "created_at": "2026-06-12T15:17:01.027367",
-    "last_validated": "2026-06-12T15:17:01.027367",
+    "created_at": "2026-06-12T15:37:03.445906",
+    "last_validated": "2026-06-12T15:37:03.445906",
     "validation_count": 1,
     "expiry": null,
     "history": [
       {
         "action": "created",
-        "timestamp": "2026-06-12T15:17:01.027367",
+        "timestamp": "2026-06-12T15:37:03.445906",
         "detail": "Recorded by kamu (internal)"
       }
     ]

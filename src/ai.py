@@ -1,6 +1,7 @@
 """
 Saki AI Module
 Semua fungsi AI: chat, ringkas, ekstrak, reflection, merge
+Dengan Model Router untuk performa optimal
 """
 import sys
 from pathlib import Path
@@ -15,10 +16,22 @@ import datetime
 import os
 import time
 
+from src.model_router import ModelRouter, TaskType
+
+# Inisialisasi Model Router (sekali aja)
+_model_router = None
+
+def get_router() -> ModelRouter:
+    """Lazy init Model Router."""
+    global _model_router
+    if _model_router is None:
+        _model_router = ModelRouter()
+    return _model_router
+
 logger = logging.getLogger("saki")
 
 # ========== KONFIGURASI ==========
-MODEL = "qwen3:4b"
+MODEL = "qwen3:4b"  # Default model (fallback)
 NAMA_AI = "Saki"
 AUTO_EXTRACT_THRESHOLD = 0.65
 SUMMARY_MAX_LENGTH = 4000
@@ -33,15 +46,7 @@ from src.database import (
     cari_dokumen_semantik, lihat_semua_dokumen
 )
 
-# Import audit pipeline
-from src.audit_pipeline import (
-    start_audit_request, get_current_metrics, search_memory, search_reflections,
-    search_timeline, search_documents, search_chroma, build_prompt,
-    audit_ollama_chat, generate_audit_report, count_tokens
-)
-
 # ========== SYSTEM PROMPT ==========
-# Load self-knowledge
 self_text = ""
 self_path = "SAKI_SELF.md"
 if os.path.exists(self_path):
@@ -66,163 +71,109 @@ Saat merangkum, gunakan format:
 [keyword1, keyword2, keyword3]"""
 
 # ========== FUNGSI AI DASAR ==========
+
 def ringkas_teks(teks: str) -> str:
-    """Meringkas teks panjang dengan audit timing."""
+    """Meringkas teks panjang — pakai Model Router."""
     try:
-        metrics = get_current_metrics()
-        if metrics:
-            metrics.mark_start("ringkas_teks")
+        router = get_router()
         
-        start = time.time()
-        
-        # Count input tokens
-        input_tokens = count_tokens(teks)
-        logger.info(f"📝 ringkas_teks input: {input_tokens} tokens")
-        
-        # Build messages
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": f"Ringkas teks berikut:\n\n{teks}"}
         ]
         
-        # Log before sending
-        total_tokens = count_tokens(SYSTEM_PROMPT) + input_tokens
-        logger.info(f"📤 Sending to Qwen for summarization")
-        logger.info(f"   └─ Total tokens: {total_tokens}")
-        print(f"📝 Summarizing text ({total_tokens} tokens)...")
-        
-        response = ollama.chat(model=MODEL, messages=messages)
-        result = response["message"]["content"]
-        
-        output_tokens = count_tokens(result)
-        duration = time.time() - start
-        
-        if metrics:
-            metrics.mark_end("ringkas_teks")
-            metrics.set_token_count("ringkas_teks_input", total_tokens)
-            metrics.set_token_count("ringkas_teks_output", output_tokens)
-        
-        logger.info(f"✅ ringkas_teks completed in {duration:.3f}s")
-        logger.info(f"   ├─ Output tokens: {output_tokens}")
-        logger.info(f"   └─ Compression ratio: {len(teks)}/{len(result)} = {len(teks)/len(result):.2f}x")
-        
-        return result
+        result = router.chat(messages, task_type=TaskType.SUMMARIZE)
+        return result["content"]
     except Exception as e:
         logger.error(f"Summarization failed: {str(e)}", exc_info=True)
-        if metrics:
-            metrics.mark_end("ringkas_teks")
         return f"Maaf, gagal meringkas: {type(e).__name__}"
 
-def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
-    """Chat dengan Saki, termasuk konteks fakta dan dokumen.
-    
-    Dengan Audit Pipeline:
-    - Timing untuk setiap operasi search
-    - Token counting sebelum kirim ke Qwen
-    - Performance monitoring
-    """
-    # Mulai audit request
-    metrics = start_audit_request()
-    
-    try:
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-        # Tambah fakta sebagai konteks (dengan timing)
-        fakta = search_memory()
-        if fakta:
-            fakta_text = "\n".join([f"- [{f[1]}] {f[2]}" for f in fakta if f[4] >= MIN_CONFIDENCE_THRESHOLD])
-            if fakta_text:
-                messages.append({"role": "system", "content": f"Info tentang user:\n{fakta_text}"})
-            # Track akses
-            for f in fakta:
-                if f[5] >= MIN_IMPORTANCE_FOR_TRACKING:
-                    track_access(f[0])
+def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
+    """Chat dengan Sani — pakai Model Router + Agent Router."""
+    
+    # === AGENT ROUTER CHECK ===
+    try:
+        from src.agents.router import AgentRouter
+        router = AgentRouter()
+        agent, routed_message = router.route(pesan)
         
-        # Cari dokumen relevan dengan timing
+        if agent == "special":
+            result = router.execute_special(routed_message)
+            return result
+        
+        if agent is not None:
+            result = agent.execute(routed_message)
+            return f"🤖 **{agent.name}**\n\n{result}"
+    except Exception as e:
+        logger.debug(f"Agent routing skipped: {str(e)}")
+    
+    # === BUILD MESSAGES ===
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    
+    # Tambah fakta sebagai konteks
+    fakta = lihat_semua_fakta()
+    if fakta:
+        fakta_text = "\n".join([
+            f"- [{f[1]}] {f[2]}"
+            for f in fakta if f[4] >= MIN_CONFIDENCE_THRESHOLD
+        ])
+        if fakta_text:
+            messages.append({
+                "role": "system",
+                "content": f"Info tentang user:\n{fakta_text}"
+            })
+        # Track akses
+        for f in fakta:
+            if f[5] >= MIN_IMPORTANCE_FOR_TRACKING:
+                track_access(f[0])
+    
+    # Semantic search — SKIP untuk chat pendek
+    if len(pesan.split()) > 5:
         try:
-            dokumen_relevan = search_chroma(pesan, n_results=3)
+            dokumen_relevan = cari_dokumen_semantik(pesan, n_results=2)
             if dokumen_relevan:
                 docs_text = []
                 for doc in dokumen_relevan:
-                    nama = doc[1]  # filename
+                    nama = doc[1]
                     ringkasan = doc[4] if doc[4] else "Tidak ada ringkasan"
-                    docs_text.append(f"📄 {nama}\n{ringkasan[:300]}")
+                    docs_text.append(f"📄 {nama}\n{ringkasan[:200]}")
                 
                 if docs_text:
-                    messages.append({
+                    messages.insert(1, {
                         "role": "system",
-                        "content": "Dokumen yang relevan dengan pertanyaan user:\n\n" + "\n\n".join(docs_text)
+                        "content": "Dokumen relevan:\n\n" + "\n\n".join(docs_text)
                     })
         except Exception as e:
-            logger.warning(f"Document search failed (non-critical): {str(e)}")
-
-        # === AGENT ROUTER (Fase 2A) ===
-        try:
-            from src.agents.router import AgentRouter
-            router = AgentRouter()
-            agent, routed_message = router.route(pesan)
-            
-            if agent == "special":
-                # Special commands (screenshot, cmd, system info)
-                result = router.execute_special(routed_message)
-                return result
-            
-            if agent is not None:
-                result = agent.execute(routed_message)
-                return f"🤖 **{agent.name}**\n\n{result}"
-        except Exception as e:
-            logger.debug(f"Agent routing skipped: {str(e)}")
-     
-        # Tambah riwayat chat
-        if riwayat_chat:
-            for msg in riwayat_chat[-10:]:
-                messages.append(msg)
-        
-        messages.append({"role": "user", "content": pesan})
-        
-        # BUILD PROMPT dengan audit dan token counting
-        prompt_audit = build_prompt(SYSTEM_PROMPT, messages)
-        token_count = prompt_audit['token_count']
-        
-        # AUDIT LOG: Print token count sebelum kirim ke Qwen
-        logger.info(f"✅ PROMPT READY TO SEND TO QWEN")
-        logger.info(f"   ├─ Prompt length: {prompt_audit['char_count']} characters")
-        logger.info(f"   └─ Token count: {token_count}")
-        
-        print(f"\n{'='*70}")
-        print(f"✅ READY TO SEND TO QWEN")
-        print(f"{'='*70}")
-        print(f"Prompt length: {prompt_audit['char_count']} characters")
-        print(f"Token count: {token_count}")
-        print(f"{'='*70}\n")
-        
-        # Send to Qwen dengan audit
-        response = audit_ollama_chat(model=MODEL, messages=prompt_audit['messages'], audit_name="ollama.chat_main")
-        
-        # Log audit report
-        report = generate_audit_report(metrics)
-        logger.info(report)
-        print(report)
-        
-        return response["message"]["content"]
+            logger.warning(f"Document search failed: {str(e)}")
     
+    # Tambah riwayat chat (dikurangi)
+    if riwayat_chat:
+        for msg in riwayat_chat[-6:]:
+            messages.append(msg)
+    
+    messages.append({"role": "user", "content": pesan})
+    
+    # === MODEL ROUTER ===
+    try:
+        router = get_router()
+        task_type = router.classify_task(pesan)
+        result = router.chat(messages, task_type=task_type)
+        return result["content"]
     except Exception as e:
         logger.error(f"Chat failed: {str(e)}", exc_info=True)
-        # Log audit report meskipun error
-        if metrics:
-            report = generate_audit_report(metrics)
-            logger.error(f"Error occurred during chat:\n{report}")
-        return f"Maaf, terjadi kesalahan: {type(e).__name__}"
+        # Fallback ke model default
+        try:
+            response = ollama.chat(model=MODEL, messages=messages)
+            return response["message"]["content"]
+        except:
+            return f"Maaf, terjadi kesalahan: {type(e).__name__}"
 
-# ========== AUTO-EXTRACTION ==========
+
 def auto_ekstrak_fakta(pesan_user: str, riwayat_chat: List[Dict] = None) -> Optional[Dict]:
-    """Ekstrak fakta penting dari pesan user dengan audit timing."""
+    """Ekstrak fakta penting dari pesan user — pakai Model Router."""
     if len(pesan_user.split()) < 3:
         return None
-    
-    metrics = get_current_metrics()
-    if metrics:
-        metrics.mark_start("auto_ekstrak_fakta")
     
     konteks = ""
     if riwayat_chat and len(riwayat_chat) >= 2:
@@ -232,22 +183,20 @@ def auto_ekstrak_fakta(pesan_user: str, riwayat_chat: List[Dict] = None) -> Opti
     prompt = f"""Analisis pesan berikut. Apakah mengandung FAKTA PENTING TENTANG USER yang bersifat PERMANEN?
 
 KRITERIA FAKTA PENTING (harus dicatat):
-- Proyek yang sedang dikerjakan (bukan sekadar "nanti mau bikin")
-- Skill atau kemampuan ("Saya bisa Python")
-- Pekerjaan atau pendidikan ("Saya mahasiswa TI semester 5")
-- Preferensi KUAT yang konsisten ("Saya tidak suka kopi pahit")
+- Proyek yang sedang dikerjakan
+- Skill atau kemampuan
+- Pekerjaan atau pendidikan
+- Preferensi KUAT yang konsisten
 - Kontak atau identitas penting
 - Deadline atau target serius
 
 BUKAN FAKTA PENTING (abaikan):
 - Obrolan ringan atau candaan
-- Kebutuhan sesaat ("Saya butuh beli pulsa")
-- Rencana belum pasti ("Saya kepikiran mau belajar X")
-- Info harga atau list belanja
+- Kebutuhan sesaat
+- Rencana belum pasti
 - Pertanyaan atau permintaan tolong
-- Opini tentang sesuatu yang bukan diri user
 
-KONTEKS PERCAKAPAN (jika ada):
+KONTEKS PERCAKAPAN:
 {konteks}
 
 PESAN USER:
@@ -259,66 +208,44 @@ Jawab JSON saja:
 Jika ragu, pilih false."""
 
     try:
-        prompt_tokens = count_tokens(prompt)
-        logger.debug(f"📤 auto_ekstrak_fakta sending to Qwen ({prompt_tokens} tokens)")
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Kamu adalah filter fakta yang KETAT. Jawab HANYA JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.EXTRACT
+        )
+        hasil = result["content"].strip()
         
-        start = time.time()
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Kamu adalah filter fakta yang KETAT. Jawab HANYA JSON."},
-            {"role": "user", "content": prompt}
-        ])
-        duration = time.time() - start
-        
-        hasil = response["message"]["content"].strip()
         if hasil.startswith("```"):
             hasil = hasil.split("\n", 1)[1].rstrip("```")
         hasil = hasil.strip()
         
         data = json.loads(hasil)
         
-        # Debug: log hasil AI
-        logger.debug(f"Auto-extract raw response: {hasil[:200]}")
-        logger.debug(f"Auto-extract parsed: is_fact={data.get('is_fact')}, confidence={data.get('confidence')}")
-        logger.info(f"⏱️  auto_ekstrak_fakta: {duration:.3f}s")
-        
-        if metrics:
-            metrics.mark_end("auto_ekstrak_fakta")
-            metrics.set_token_count("auto_ekstrak_fakta", prompt_tokens)
+        logger.debug(f"Auto-extract: is_fact={data.get('is_fact')}, confidence={data.get('confidence')}")
         
         if data.get("is_fact") and data.get("confidence", 0) >= AUTO_EXTRACT_THRESHOLD:
-            logger.info(f"Auto-extract ACCEPTED: [{data.get('category')}] {data.get('fact')} (conf={data.get('confidence')})")
+            logger.info(f"Auto-extract ACCEPTED: [{data.get('category')}] {data.get('fact')}")
             return {
                 "fact": data["fact"],
                 "category": data.get("category", "umum"),
                 "confidence": data["confidence"]
             }
         
-        # Log kenapa ditolak
-        if data.get("is_fact"):
-            logger.debug(f"Auto-extract REJECTED: confidence {data.get('confidence')} < threshold {AUTO_EXTRACT_THRESHOLD}")
-        else:
-            logger.debug(f"Auto-extract REJECTED: is_fact=False for '{pesan_user[:50]}...'")
-        
         return None
         
     except json.JSONDecodeError as e:
-        logger.warning(f"Auto-extract JSON parse failed: {str(e)} | raw: {hasil[:100] if 'hasil' in locals() else 'N/A'}")
-        if metrics:
-            metrics.mark_end("auto_ekstrak_fakta")
+        logger.warning(f"Auto-extract JSON parse failed: {str(e)}")
         return None
     except Exception as e:
-        logger.error(f"Auto-extract failed: {type(e).__name__}: {str(e)}", exc_info=True)
-        if metrics:
-            metrics.mark_end("auto_ekstrak_fakta")
+        logger.error(f"Auto-extract failed: {str(e)}", exc_info=True)
         return None
 
-# ========== IMPORTANCE RATING ==========
+
 def auto_rate_importance(content: str, category: str) -> int:
-    """AI menilai importance dari sebuah fakta (1-10) dengan audit timing."""
-    metrics = get_current_metrics()
-    if metrics:
-        metrics.mark_start("auto_rate_importance")
-    
+    """AI menilai importance (1-10) — pakai Model Router."""
     prompt = f"""Nilai seberapa PENTING fakta ini untuk diingat. HANYA beri angka 1-10.
 
 PEDOMAN SKOR:
@@ -326,7 +253,7 @@ PEDOMAN SKOR:
 8-9 = Proyek aktif, deadline, kontak penting
 6-7 = Skill, pekerjaan, pendidikan
 4-5 = Preferensi, hobi yang serius
-1-3 = Hobi ringan, info umum, obrolan
+1-3 = Hobi ringan, info umum
 
 FAKTA: "{content}"
 KATEGORI: {category}
@@ -334,47 +261,36 @@ KATEGORI: {category}
 Jawab HANYA satu angka. Contoh: 8"""
 
     try:
-        prompt_tokens = count_tokens(prompt)
-        logger.debug(f"📤 auto_rate_importance sending to Qwen ({prompt_tokens} tokens)")
-        
-        start = time.time()
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Jawab HANYA satu angka 1-10."},
-            {"role": "user", "content": prompt}
-        ])
-        duration = time.time() - start
-        
-        hasil = response["message"]["content"].strip()
-        logger.info(f"⏱️  auto_rate_importance: {duration:.3f}s")
-        
-        if metrics:
-            metrics.mark_end("auto_rate_importance")
-            metrics.set_token_count("auto_rate_importance", prompt_tokens)
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Jawab HANYA satu angka 1-10."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.EXTRACT
+        )
+        hasil = result["content"].strip()
         
         match = re.search(r'\b(10|[1-9])\b', hasil)
         if match:
-            score = int(match.group(1))
-            logger.debug(f"Auto-rated importance: {score}/10 for '{content[:50]}...'")
-            return score
+            return int(match.group(1))
         
         fallback = {"akun": 10, "proyek": 8, "jadwal": 7, "kontak": 7,
                     "pekerjaan": 7, "skill": 6, "pendidikan": 6,
                     "preferensi": 4, "umum": 5}
         return fallback.get(category, 5)
     except Exception as e:
-        logger.error(f"Auto-rate importance failed: {str(e)}", exc_info=True)
-        if metrics:
-            metrics.mark_end("auto_rate_importance")
+        logger.error(f"Auto-rate importance failed: {str(e)}")
         return 5
 
-# ========== MERGE ==========
+
 def merge_fakta_dengan_ai(fakta_list: List[Tuple]) -> str:
-    """Gabungkan beberapa fakta dengan AI."""
+    """Gabungkan fakta dengan AI — pakai Model Router."""
     if not fakta_list:
         return "Tidak ada fakta untuk digabung."
     
     fakta_text = "\n".join([f"- {f[2]}" for f in fakta_list])
-    logger.info(f"Merging {len(fakta_list)} facts: {[f[0] for f in fakta_list]}")
+    logger.info(f"Merging {len(fakta_list)} facts")
     
     prompt = f"""Gabungkan fakta-fakta berikut menjadi satu fakta yang padat dan koheren.
 Jangan ada informasi yang hilang. Hilangkan pengulangan.
@@ -385,17 +301,19 @@ Output hanya fakta gabungannya saja, tanpa penjelasan.
 Hasil gabungan:"""
     
     try:
-        response = ollama.chat(model=MODEL, messages=[{"role": "user", "content": prompt}])
-        hasil = response["message"]["content"].strip()
-        logger.info(f"Merge result: {hasil[:100]}...")
-        return hasil
+        router = get_router()
+        result = router.chat(
+            messages=[{"role": "user", "content": prompt}],
+            task_type=TaskType.MERGE
+        )
+        return result["content"].strip()
     except Exception as e:
-        logger.error(f"Merge failed: {str(e)}", exc_info=True)
+        logger.error(f"Merge failed: {str(e)}")
         return f"[Gagal menggabungkan: {type(e).__name__}]"
 
-# ========== DUPLICATE DETECTION ==========
+
 def deteksi_duplikat_semantik() -> List[Dict]:
-    """Deteksi fakta duplikat dengan AI."""
+    """Deteksi fakta duplikat — pakai Model Router."""
     fakta = lihat_semua_fakta()
     if len(fakta) < 2:
         return []
@@ -409,11 +327,15 @@ Jawab JSON array: [{{"id1": 1, "id2": 2, "reason": "...", "suggestion": "..."}}]
 Jika tidak ada, jawab []."""
 
     try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Jawab HANYA JSON array."},
-            {"role": "user", "content": prompt}
-        ])
-        raw = response["message"]["content"].strip()
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Jawab HANYA JSON array."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.RELATIONSHIP
+        )
+        raw = result["content"].strip()
         
         if raw.startswith("```"):
             raw = raw.split("\n", 1)[1].rstrip("```")
@@ -434,31 +356,24 @@ Jika tidak ada, jawab []."""
             except:
                 pass
         
-        logger.info("Duplicate detection: no valid results")
         return []
     except Exception as e:
-        logger.error(f"Duplicate detection failed: {str(e)}", exc_info=True)
+        logger.error(f"Duplicate detection failed: {str(e)}")
         return []
 
-# ========== REFLECTION (V5) ==========
+
 def generate_reflection() -> Tuple[List[Dict], str]:
-    """Analisis fakta, hasilkan insight dengan audit timing."""
-    metrics = start_audit_request()
+    """Analisis fakta, hasilkan insight — pakai Model Router."""
+    fakta = ambil_fakta_belum_reflected()
     
-    try:
-        metrics.mark_start("generate_reflection")
-        
-        # Search unreflected facts
-        fakta = ambil_fakta_belum_reflected()
-        
-        if len(fakta) < 3:
-            return [], f"Butuh minimal 3 fakta baru. Saat ini: {len(fakta)}"
-        
-        logger.info(f"Generating reflection for {len(fakta)} unreflected facts")
-        
-        fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
-        
-        prompt = f"""Analisis fakta-fakta berikut. HANYA kelompokkan yang BENAR-BENAR terkait secara makna.
+    if len(fakta) < 3:
+        return [], f"Butuh minimal 3 fakta baru. Saat ini: {len(fakta)}"
+    
+    logger.info(f"Generating reflection for {len(fakta)} unreflected facts")
+    
+    fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
+    
+    prompt = f"""Analisis fakta-fakta berikut. HANYA kelompokkan yang BENAR-BENAR terkait secara makna.
 
 {fakta_text}
 
@@ -473,25 +388,17 @@ Output JSON array:
 [{{"title": "Judul", "content": "Isi insight", "source_ids": [1,3], "category": "proyek/pembelajaran/preferensi/umum"}}]
 Jika tidak ada, jawab []."""
 
-        # Token counting
-        prompt_tokens = count_tokens(prompt)
-        logger.info(f"📤 generate_reflection sending to Qwen")
-        logger.info(f"   └─ Prompt tokens: {prompt_tokens}")
-        print(f"🧠 Generating reflection ({prompt_tokens} tokens)...")
-        
-        start = time.time()
-        response = audit_ollama_chat(
-            model=MODEL,
+    try:
+        router = get_router()
+        result = router.chat(
             messages=[
                 {"role": "system", "content": "Kamu sistem analisis pengetahuan. Jawab HANYA JSON array."},
                 {"role": "user", "content": prompt}
             ],
-            audit_name="generate_reflection_ollama"
+            task_type=TaskType.REFLECTION
         )
-        duration = time.time() - start
-        
-        raw = response["message"]["content"].strip()
-        logger.debug(f"Reflection raw: {raw[:300]}")
+        raw = result["content"].strip()
+        logger.info(f"Reflection: model={result['model']}, {result['tokens']:.0f} tokens in {result['elapsed']:.1f}s")
         
         if raw.startswith("```"):
             parts = raw.split("```")
@@ -510,24 +417,16 @@ Jika tidak ada, jawab []."""
         if len(insights) == 0:
             return [], "Tidak ada pengelompokan yang bisa dibuat."
         
-        metrics.mark_end("generate_reflection")
-        logger.info(f"✅ Reflection generated {len(insights)} insights in {duration:.3f}s")
-        
-        # Log audit report
-        report = generate_audit_report(metrics)
-        logger.info(report)
-        print(report)
-        
+        logger.info(f"Reflection generated {len(insights)} insights")
         return insights, ""
     
     except json.JSONDecodeError as e:
         logger.error(f"Reflection JSON parse failed: {str(e)}")
-        metrics.mark_end("generate_reflection")
         return [], f"Gagal memproses hasil AI. Coba lagi."
     except Exception as e:
         logger.error(f"Reflection failed: {str(e)}", exc_info=True)
-        metrics.mark_end("generate_reflection")
         return [], f"Gagal generate reflection: {type(e).__name__}"
+
 
 def save_reflections(insights: List[Dict]) -> int:
     """Simpan hasil reflection ke database."""
@@ -554,7 +453,9 @@ def save_reflections(insights: List[Dict]) -> int:
     logger.info(f"Saved {saved} reflections")
     return saved
 
-# ========== TIMELINE (V5.5) ==========
+
+# ========== TIMELINE ==========
+
 def generate_timeline() -> List[Dict]:
     """Generate timeline 3 level: bulan → minggu → hari."""
     from src.database import get_all_timeline_data
@@ -569,7 +470,6 @@ def generate_timeline() -> List[Dict]:
     if not all_facts and not all_reflections and not all_chats:
         return []
     
-    # Organize data by date
     daily_data = defaultdict(lambda: {"facts": [], "insights": [], "chat_count": 0})
     
     for f in all_facts:
@@ -594,14 +494,12 @@ def generate_timeline() -> List[Dict]:
     
     for c in all_chats:
         try:
-            date_key = c[0]  # Already a date string
+            date_key = c[0]
             daily_data[date_key]["chat_count"] = c[1]
         except:
             continue
-
-     # V8.1: Tambah dokumen ke daily_data
-    all_documents = lihat_semua_dokumen()
     
+    all_documents = lihat_semua_dokumen()
     for d in all_documents:
         try:
             dt = datetime.datetime.strptime(d[4], "%Y-%m-%d %H:%M:%S")
@@ -614,7 +512,6 @@ def generate_timeline() -> List[Dict]:
         except:
             continue
     
-    # Group into weeks and months
     months = defaultdict(lambda: {"weeks": defaultdict(lambda: {"days": {}}), "total_items": 0})
     
     for date_str in sorted(daily_data.keys()):
@@ -622,7 +519,6 @@ def generate_timeline() -> List[Dict]:
         month_key = dt.strftime("%Y-%m")
         month_name = dt.strftime("%B %Y")
         
-        # Calculate week number within month
         first_day = dt.replace(day=1)
         week_num = ((dt - first_day).days // 7) + 1
         week_label = f"Minggu {week_num}"
@@ -634,7 +530,7 @@ def generate_timeline() -> List[Dict]:
             len(day_data.get("documents", [])) +
             (1 if day_data.get("chat_count", 0) > 0 else 0)
         )
-
+        
         months[month_key]["name"] = month_name
         months[month_key]["year"] = dt.year
         months[month_key]["month_num"] = dt.month
@@ -645,19 +541,15 @@ def generate_timeline() -> List[Dict]:
             **day_data
         }
     
-    # Build result structure
     result = []
     for month_key in sorted(months.keys()):
         month_data = months[month_key]
-        
-        # Build weeks list
         weeks_list = []
         for week_label in sorted(month_data["weeks"].keys()):
             week_data = month_data["weeks"][week_label]
             days_list = []
             for day_num in sorted(week_data["days"].keys()):
                 days_list.append(week_data["days"][day_num])
-            
             weeks_list.append({
                 "label": week_label,
                 "days": days_list,
@@ -666,13 +558,12 @@ def generate_timeline() -> List[Dict]:
                     for d in days_list
                 )
             })
-        
         result.append({
             "year": month_data["year"],
             "month": month_data["name"].split()[0],
             "month_name": month_data["name"],
             "total_items": month_data["total_items"],
-            "summary": None,  # Will be filled by AI later
+            "summary": None,
             "weeks": weeks_list
         })
     
@@ -680,11 +571,10 @@ def generate_timeline() -> List[Dict]:
 
 
 def generate_timeline_summary(month_name: str, items: List[Dict]) -> str:
-    """Generate AI summary untuk satu bulan."""
+    """Generate AI summary untuk satu bulan — pakai Model Router."""
     if not items:
         return "Tidak ada aktivitas."
     
-    # Build context from items
     facts_text = []
     insights_text = []
     
@@ -712,15 +602,20 @@ Fokus ke topik utama dan perkembangan penting.
 Ringkasan:"""
 
     try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Kamu adalah asisten yang merangkum aktivitas bulanan. Jawab dalam 1-2 kalimat Bahasa Indonesia yang natural."},
-            {"role": "user", "content": prompt}
-        ])
-        return response["message"]["content"].strip()
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Kamu adalah asisten yang merangkum aktivitas bulanan. Jawab dalam 1-2 kalimat Bahasa Indonesia yang natural."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.SUMMARIZE
+        )
+        return result["content"].strip()
     except Exception as e:
-        logger.error(f"Timeline summary failed: {str(e)}", exc_info=True)
+        logger.error(f"Timeline summary failed: {str(e)}")
         return f"Bulan ini: {len(facts_text)} fakta, {len(insights_text)} insight."
-    
+
+
 def generate_morning_greeting() -> str:
     """Generate sapaan pagi dengan rekap kemarin."""
     from src.database import get_daily_stats
@@ -750,17 +645,13 @@ def generate_morning_greeting() -> str:
 
 
 def extract_relationships() -> Tuple[int, str]:
-    """
-    AI menganalisis semua fakta dan mencari hubungan.
-    Return (jumlah_relationships, error_message)
-    """
+    """AI menganalisis semua fakta dan mencari hubungan — pakai Model Router."""
     from src.database import lihat_semua_fakta, simpan_relationship, hapus_semua_relationships
     
     fakta = lihat_semua_fakta()
     if len(fakta) < 3:
         return 0, "Minimal 3 fakta untuk extract relationships."
     
-    # Hapus relationships lama
     hapus_semua_relationships()
     
     fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
@@ -770,24 +661,24 @@ def extract_relationships() -> Tuple[int, str]:
 {fakta_text}
 
 Dua fakta TERKAIT jika:
-- Membahas topik yang sama (proyek yang sama, hobi yang sama, dll)
+- Membahas topik yang sama
 - Satu fakta adalah bagian dari yang lain
 - Satu fakta mendukung atau menjelaskan yang lain
 
 Output JSON array:
-[
-  {{"source_id": 1, "target_id": 3, "relation_type": "related", "confidence": 0.9, "reason": "Satu proyek yang sama"}},
-  ...
-]
-
-HANYA tampilkan pasangan yang benar-benar terkait. Jangan memaksakan."""
+[{{"source_id": 1, "target_id": 3, "relation_type": "related", "confidence": 0.9, "reason": "Satu proyek yang sama"}}]
+HANYA tampilkan pasangan yang benar-benar terkait."""
 
     try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Kamu sistem analisis hubungan pengetahuan. Jawab HANYA JSON array."},
-            {"role": "user", "content": prompt}
-        ])
-        raw = response["message"]["content"].strip()
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Kamu sistem analisis hubungan pengetahuan. Jawab HANYA JSON array."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.RELATIONSHIP
+        )
+        raw = result["content"].strip()
         
         if raw.startswith("```"):
             parts = raw.split("```")
@@ -806,37 +697,27 @@ HANYA tampilkan pasangan yang benar-benar terkait. Jangan memaksakan."""
         
         saved = 0
         for rel in relationships:
-
             source_id = rel.get("source_id") or rel.get("id1") or rel.get("source") or rel.get("from")
             target_id = rel.get("target_id") or rel.get("id2") or rel.get("target") or rel.get("to")
             
             if not source_id or not target_id:
-                logger.warning(f"Skipping relationship: missing source/target - {rel}")
                 continue
             
-            relation_type = rel.get("relation_type") or rel.get("type") or rel.get("relation") or "related"
-            confidence = rel.get("confidence") or rel.get("conf") or rel.get("score") or 0.7
+            relation_type = rel.get("relation_type") or rel.get("type") or "related"
+            confidence = rel.get("confidence") or rel.get("conf") or 0.7
             
             try:
-                source_id = int(source_id)
-                target_id = int(target_id)
-                confidence = float(confidence)
-            except (ValueError, TypeError):
-                logger.warning(f"Skipping relationship: invalid types - {rel}")
+                rid = simpan_relationship(int(source_id), int(target_id), relation_type, float(confidence))
+                if rid:
+                    saved += 1
+            except:
                 continue
-            
-            rid = simpan_relationship(source_id, target_id, relation_type, confidence)
-            if rid:
-                saved += 1
         
         logger.info(f"Extracted {saved} relationships from {len(fakta)} facts")
         return saved, ""
     
-    except json.JSONDecodeError as e:
-        logger.error(f"Relationship extraction JSON failed: {str(e)}")
-        return 0, "Gagal memproses hasil AI."
     except Exception as e:
-        logger.error(f"Relationship extraction failed: {str(e)}", exc_info=True)
+        logger.error(f"Relationship extraction failed: {str(e)}")
         return 0, f"Error: {type(e).__name__}"
 
 
@@ -848,28 +729,14 @@ def build_knowledge_graph() -> Dict:
     fakta_list = lihat_semua_fakta()
     fakta = {f[0]: f for f in fakta_list}
     
-    # Build nodes
     nodes = {}
     for f_id, f_data in fakta.items():
-        nodes[f_id] = {
-            "id": f_id,
-            "category": f_data[1],
-            "content": f_data[2][:80],
-            "importance": f_data[5]
-        }
+        nodes[f_id] = {"id": f_id, "category": f_data[1], "content": f_data[2][:80], "importance": f_data[5]}
     
-    # Build edges
     edges = []
     for rel in relationships:
-        edges.append({
-            "id": rel["id"],
-            "source": rel["source_id"],
-            "target": rel["target_id"],
-            "type": rel["relation_type"],
-            "confidence": rel["confidence"]
-        })
+        edges.append({"id": rel["id"], "source": rel["source_id"], "target": rel["target_id"], "type": rel["relation_type"], "confidence": rel["confidence"]})
     
-    # Find connected components (clusters)
     clusters = []
     visited = set()
     
@@ -890,18 +757,11 @@ def build_knowledge_graph() -> Dict:
             if len(cluster) >= 2:
                 clusters.append(cluster)
     
-    return {
-        "nodes": nodes,
-        "edges": edges,
-        "clusters": clusters,
-        "total_nodes": len(nodes),
-        "total_edges": len(edges),
-        "total_clusters": len(clusters)
-    }
+    return {"nodes": nodes, "edges": edges, "clusters": clusters, "total_nodes": len(nodes), "total_edges": len(edges), "total_clusters": len(clusters)}
 
 
 def generate_weekly_summary_v2() -> str:
-    """Generate ringkasan mingguan V2 — fokus ke topik spesifik."""
+    """Generate ringkasan mingguan — pakai Model Router."""
     from src.database import get_weekly_stats, lihat_semua_fakta
     
     stats = get_weekly_stats()
@@ -909,7 +769,6 @@ def generate_weekly_summary_v2() -> str:
     if stats.get("week_facts", 0) == 0:
         return "Minggu ini belum ada aktivitas."
     
-    # Ambil fakta minggu ini
     week_start = stats["week_start"]
     
     fakta_minggu_ini = []
@@ -924,8 +783,7 @@ def generate_weekly_summary_v2() -> str:
         return "Tidak ada fakta baru minggu ini."
     
     fakta_text = "\n".join([f"- [{f[1]}] {f[2][:100]}" for f in fakta_minggu_ini[:20]])
-
-    # V8.1: Tambah dokumen minggu ini
+    
     docs_minggu_ini = []
     for d in lihat_semua_dokumen():
         try:
@@ -943,55 +801,47 @@ def generate_weekly_summary_v2() -> str:
 Fakta minggu ini:
 {fakta_text}
 
-Aturan:
-1. Sebutkan topik-topik spesifik yang dibahas (contoh: "pengembangan website topup", "belajar Python", "riset ML")
-2. Sebutkan aktivitas penting (upload dokumen, insight baru, deadline)
-3. JANGAN sebutkan jumlah angka
-4. Tulis dalam 3-4 kalimat Bahasa Indonesia yang natural dan mengalir
-5. Jika ada dokumen yang diupload, sebutkan judulnya
-6. Akhiri dengan satu kalimat tentang fokus utama minggu ini
-
-Contoh output yang baik:
-"Minggu ini Anda fokus pada pengembangan website topup — membahas struktur database dan integrasi payment gateway. Anda juga mengupload proposal skripsi tentang machine learning. Beberapa fakta baru tentang preferensi kopi dan anime tercatat. Fokus utama minggu ini adalah persiapan MVP website topup."
+Tulis dalam 3-4 kalimat Bahasa Indonesia yang natural. Sebutkan topik spesifik, aktivitas penting, dan fokus utama.
 
 Ringkasan:"""
 
     try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Kamu merangkum aktivitas mingguan dengan fokus ke TOPIK, bukan jumlah."},
-            {"role": "user", "content": prompt}
-        ])
-        return response["message"]["content"].strip()
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Kamu merangkum aktivitas mingguan."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.SUMMARIZE
+        )
+        return result["content"].strip()
     except Exception as e:
-        logger.error(f"Weekly summary v2 failed: {str(e)}", exc_info=True)
+        logger.error(f"Weekly summary failed: {str(e)}")
         return "Gagal membuat ringkasan."
 
-# ========== PROACTIVE ASSISTANT (V8) ==========
+
+# ========== PROACTIVE ASSISTANT ==========
+
 def check_proactive_triggers() -> List[Dict]:
-    """Cek semua trigger proaktif. Return list of alerts."""
+    """Cek semua trigger proaktif."""
     from src.database import (
         cek_proyek_mengendap, cek_deadline_mendekat, 
         ambil_fakta_belum_reflected, simpan_alert, lihat_active_alerts
     )
     
-    alerts = []
-    
-    # 1. Proyek mengendap (>30 hari)
     old_projects = cek_proyek_mengendap(30)
     for p in old_projects:
-        msg = f"📌 Proyek '{p['content'][:80]}' sudah {p['days']} hari tidak dibahas. Masih aktif?"
+        msg = f"📌 Proyek '{p['content'][:80]}' sudah {p['days']} hari tidak dibahas."
         simpan_alert("stale_project", msg, "medium", p["id"])
     
-    # 2. Deadline mendekat
     deadlines = cek_deadline_mendekat(14)
     for d in deadlines:
         msg = f"⏰ Deadline: '{d['content'][:80]}' — perlu action segera."
         simpan_alert("upcoming_deadline", msg, "high", d["id"])
     
-    # 3. Insight menunggu
     unreflected = ambil_fakta_belum_reflected()
     if len(unreflected) >= 10:
-        msg = f"💡 {len(unreflected)} fakta belum di-reflect. Generate insight sekarang?"
+        msg = f"💡 {len(unreflected)} fakta belum di-reflect."
         simpan_alert("insight_pending", msg, "low", None)
     
     return lihat_active_alerts()
@@ -1021,20 +871,15 @@ def generate_proactive_greeting() -> str:
     if stats.get("new_facts", 0) > 0 or stats.get("new_insights", 0) > 0:
         parts.append(f"Kemarin: {stats['new_facts']} fakta, {stats['new_insights']} insight, {stats['chat_count']} chat.")
     
-    # Tambah alert penting
     high_alerts = [a for a in alerts if a["priority"] == "high"]
     if high_alerts:
         parts.append(f"⚠️ {len(high_alerts)} hal butuh perhatian.")
-    
-    total_alerts = len(alerts)
-    if total_alerts > 0:
-        parts.append(f"🔔 {total_alerts} notifikasi menunggu.")
     
     return " ".join(parts)
 
 
 def answer_task_query() -> str:
-    """Jawab pertanyaan seperti 'Apa tugas saya yang belum selesai?'"""
+    """Jawab pertanyaan tugas."""
     from src.database import get_tasks_by_status
     
     active_tasks = get_tasks_by_status('active')
@@ -1042,7 +887,6 @@ def answer_task_query() -> str:
     if not active_tasks:
         return "Tidak ada tugas aktif. Semua sudah selesai! 🎉"
     
-    # Kelompokkan
     tasks_by_cat = {}
     for t in active_tasks:
         cat = t[1]
@@ -1051,7 +895,6 @@ def answer_task_query() -> str:
         tasks_by_cat[cat].append(t)
     
     parts = [f"Ada {len(active_tasks)} hal yang masih aktif:\n"]
-    
     for cat, tasks in tasks_by_cat.items():
         parts.append(f"\n**{cat.upper()}** ({len(tasks)}):")
         for t in tasks[:5]:
@@ -1059,8 +902,9 @@ def answer_task_query() -> str:
     
     return "\n".join(parts)
 
+
 def generate_graph_summary(cluster_facts: List[str]) -> str:
-    """Generate nama/deskripsi untuk satu cluster knowledge graph."""
+    """Generate nama cluster — pakai Model Router."""
     if len(cluster_facts) < 2:
         return cluster_facts[0] if cluster_facts else "Cluster"
     
@@ -1070,10 +914,14 @@ def generate_graph_summary(cluster_facts: List[str]) -> str:
 Nama:"""
 
     try:
-        response = ollama.chat(model=MODEL, messages=[
-            {"role": "system", "content": "Jawab HANYA 2-4 kata."},
-            {"role": "user", "content": prompt}
-        ])
-        return response["message"]["content"].strip()
+        router = get_router()
+        result = router.chat(
+            messages=[
+                {"role": "system", "content": "Jawab HANYA 2-4 kata."},
+                {"role": "user", "content": prompt}
+            ],
+            task_type=TaskType.SUMMARIZE
+        )
+        return result["content"].strip()
     except:
         return "Topik Terkait"

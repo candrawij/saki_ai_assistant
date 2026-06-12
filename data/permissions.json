@@ -6,7 +6,7 @@
     "DANGEROUS": "confirm"
   },
   "delegation": {
-    "enabled": true,
+    "enabled": false,
     "allowed_actions": [
       "chat",
       "task_query",
