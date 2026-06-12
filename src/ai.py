@@ -130,7 +130,7 @@ def _parse_json_response(raw: str) -> Optional[List[Dict]]:
         if isinstance(data, list): return data
     except: pass
     
-    # ✅ Method 6: Parse Markdown numbered list
+    # Method 6: Parse Markdown numbered list
     # Format: 1. **Title** (Fakta #1, #2, #3)
     insights = []
     lines = raw.strip().split('\n')
@@ -154,6 +154,26 @@ def _parse_json_response(raw: str) -> Optional[List[Dict]]:
     if insights:
         logger.info(f"Parsed {len(insights)} insights from Markdown list")
         return insights
+    
+    # Method 7: Parse text format relationships
+    # Format: "**(23, 29)**", "(#23, #29)", "ID 23 dan 29"
+    pairs = re.findall(r'\*?\*?\s*\(?\s*#?(\d+)\s*[,;]\s*#?(\d+)\s*\)?\s*\*?\*?', raw)
+    if not pairs:
+        # Also try: "ID 23 dan 29" atau "fakta 23 dengan 29"
+        pairs = re.findall(r'(?:ID|fakta|#)\s*(\d+)\s*(?:dan|dengan|,)\s*(?:ID|fakta|#)?\s*(\d+)', raw, re.IGNORECASE)
+    
+    if pairs:
+        insights = []
+        for id1, id2 in pairs:
+            insights.append({
+                "source_id": int(id1),
+                "target_id": int(id2),
+                "relation_type": "related",
+                "confidence": 0.8
+            })
+        if insights:
+            logger.info(f"Parsed {len(insights)} relationships from text format")
+            return insights
     
     return None
 
@@ -679,28 +699,23 @@ def generate_morning_greeting() -> str:
 # ========== RELATIONSHIPS ==========
 
 def extract_relationships() -> Tuple[int, str]:
-    """AI menganalisis semua fakta dan mencari hubungan."""
     from src.database import lihat_semua_fakta, simpan_relationship, hapus_semua_relationships
     
     fakta = lihat_semua_fakta()
     if len(fakta) < 3:
-        return 0, "Minimal 3 fakta untuk extract relationships."
+        return 0, "Minimal 3 fakta."
     
     hapus_semua_relationships()
     
-    # ✅ Batasi 20 fakta
-    if len(fakta) > 20:
-        fakta = fakta[:20]
+    # ✅ Kirim SEMUA fakta, tapi prompt lebih simpel
+    fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2][:60]}" for f in fakta])
     
-    fakta_text = "\n".join([f"[#{f[0]}] [{f[1]}] {f[2]}" for f in fakta])
+    prompt = f"""Temukan PASANGAN yang terkait. Output HARUS JSON array.
     
-    prompt = f"""Temukan PASANGAN fakta yang SALING TERKAIT.
-
 {fakta_text}
 
-Output JSON array:
 [{{"source_id": 1, "target_id": 3, "relation_type": "related", "confidence": 0.9}}]
-Jika tidak ada, jawab: []"""
+Kalau tidak ada: []"""
 
     try:
         router = get_router()
@@ -712,38 +727,40 @@ Jika tidak ada, jawab: []"""
             task_type=TaskType.RELATIONSHIP
         )
         raw = result["content"].strip()
+        logger.debug(f"Relationship raw: {raw[:300]}")
         
-        # ✅ Pakai parser dengan fallback
         relationships = _parse_json_response(raw)
         
         if relationships is None:
-            return 0, f"Gagal parse response. Raw: {raw[:100]}"
+            return 0, f"Parse gagal. Raw: {raw[:100]}"
         
         saved = 0
         for rel in relationships:
-            source_id = rel.get("source_id") or rel.get("id1") or rel.get("source")
-            target_id = rel.get("target_id") or rel.get("id2") or rel.get("target")
-            
-            if not source_id or not target_id:
+            sid = rel.get("source_id") or rel.get("id1")
+            tid = rel.get("target_id") or rel.get("id2")
+            if not sid or not tid:
                 continue
             
-            relation_type = rel.get("relation_type") or rel.get("type") or "related"
-            confidence = rel.get("confidence") or 0.7
+            # ✅ Validasi: cek fakta beneran ada
+            from src.database import lihat_fakta_by_id
+            if not lihat_fakta_by_id(int(sid)) or not lihat_fakta_by_id(int(tid)):
+                logger.warning(f"Skip invalid relationship: {sid} <-> {tid}")
+                continue
+            
+            rtype = rel.get("relation_type", "related")
+            conf = rel.get("confidence", 0.7)
             
             try:
-                rid = simpan_relationship(int(source_id), int(target_id), relation_type, float(confidence))
-                if rid:
-                    saved += 1
-            except:
-                continue
+                rid = simpan_relationship(int(sid), int(tid), rtype, float(conf))
+                if rid: saved += 1
+            except: continue
         
-        logger.info(f"Extracted {saved} relationships from {len(fakta)} facts")
+        logger.info(f"Extracted {saved} relationships")
         return saved, ""
     
     except Exception as e:
-        logger.error(f"Relationship extraction failed: {str(e)}")
-        return 0, f"Error: {type(e).__name__}"
-
+        logger.error(f"Relationship failed: {e}")
+        return 0, str(e)
 
 def build_knowledge_graph() -> Dict:
     """Bangun knowledge graph dari relationships."""
