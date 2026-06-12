@@ -14,8 +14,13 @@ from pathlib import Path
 import chromadb
 from chromadb.utils import embedding_functions
 import re
+import time
 
 logger = logging.getLogger("saki")
+
+# Simple cache
+_embedding_cache = {}
+_embedding_cache_ttl = 300  # 5 menit
 
 # ========== KONFIGURASI DATABASE ==========
 from dotenv import load_dotenv
@@ -715,7 +720,7 @@ def tambah_ke_chroma(doc_id: int, full_text: str, filename: str) -> bool:
     try:
         collection = init_chroma()
         collection.delete(ids=[str(doc_id)])
-        chunks = [full_text[i:i+1000] for i in range(0, len(full_text), 1000)]
+        chunks = [full_text[i:i+2000] for i in range(0, len(full_text), 2000)]
         for i, chunk in enumerate(chunks):
             chunk_id = f"{doc_id}_{i}"
             collection.add(documents=[chunk], metadatas=[{"doc_id": doc_id, "filename": filename, "chunk": i}], ids=[chunk_id])
@@ -725,7 +730,16 @@ def tambah_ke_chroma(doc_id: int, full_text: str, filename: str) -> bool:
         return False
 
 def cari_dokumen_semantik(query: str, n_results: int = 3) -> List[Tuple]:
-    """Cari dokumen dengan semantic search."""
+    """Cari dokumen dengan semantic search + cache."""
+
+    # Cek cache dulu
+    cache_key = f"{query}_{n_results}"
+    if cache_key in _embedding_cache:
+        cached_time, cached_result = _embedding_cache[cache_key]
+        if time.time() - cached_time < _embedding_cache_ttl:
+            logger.debug(f"Semantic search CACHE HIT for '{query[:30]}...'")
+            return cached_result
+
     try:
         collection = init_chroma()
         results = collection.query(query_texts=[query], n_results=n_results)
@@ -739,6 +753,10 @@ def cari_dokumen_semantik(query: str, n_results: int = 3) -> List[Tuple]:
             doc = lihat_dokumen_by_id(int(doc_id))
             if doc:
                 dokumen.append(doc)
+
+        # Simpan ke cache
+        _embedding_cache[cache_key] = (time.time(), dokumen)
+
         return dokumen
     except Exception as e:
         logger.error(f"Semantic search failed: {str(e)}", exc_info=True)

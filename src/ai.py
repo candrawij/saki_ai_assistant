@@ -134,22 +134,33 @@ def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
     
     # Semantic search — SKIP untuk chat pendek
     if len(pesan.split()) > 5:
-        try:
-            dokumen_relevan = cari_dokumen_semantik(pesan, n_results=2)
-            if dokumen_relevan:
-                docs_text = []
-                for doc in dokumen_relevan:
-                    nama = doc[1]
-                    ringkasan = doc[4] if doc[4] else "Tidak ada ringkasan"
-                    docs_text.append(f"📄 {nama}\n{ringkasan[:200]}")
-                
-                if docs_text:
-                    messages.insert(1, {
-                        "role": "system",
-                        "content": "Dokumen relevan:\n\n" + "\n\n".join(docs_text)
-                    })
-        except Exception as e:
-            logger.warning(f"Document search failed: {str(e)}")
+        # === SEMANTIC SEARCH (dengan skip logic) ===
+        dokumen_relevan = []
+        total_docs = len(lihat_semua_dokumen())
+
+        if total_docs > 0:
+            # Hanya search kalau query panjang ATAU dokumen banyak
+            if len(pesan.split()) > 5 or total_docs > 5:
+                try:
+                    dokumen_relevan = cari_dokumen_semantik(pesan, n_results=2)
+                except Exception as e:
+                    logger.warning(f"Document search failed (non-critical): {str(e)}")
+            else:
+                logger.debug(f"Semantic search SKIPPED: short query + few docs ({total_docs} docs)")
+
+        # Tambah ke messages kalau ada hasil
+        if dokumen_relevan:
+            docs_text = []
+            for doc in dokumen_relevan:
+                nama = doc[1]  # filename
+                ringkasan = doc[4] if doc[4] else "Tidak ada ringkasan"
+                docs_text.append(f"📄 {nama}\n{ringkasan[:200]}")
+            
+            if docs_text:
+                messages.insert(1, {
+                    "role": "system",
+                    "content": "Dokumen relevan:\n\n" + "\n\n".join(docs_text)
+                })
     
     # Tambah riwayat chat (dikurangi)
     if riwayat_chat:
