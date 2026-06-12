@@ -48,10 +48,10 @@ class ModelRouter:
             TaskType.AGENT: "fast",
             TaskType.KNOWLEDGE: "fast",
             TaskType.SUMMARIZE: "fast",
-            TaskType.EXTRACT: "reasoning",
+            TaskType.EXTRACT: "fast",
             TaskType.REFLECTION: "reasoning",
             TaskType.MERGE: "reasoning",
-            TaskType.RELATIONSHIP: "reasoning",
+            TaskType.RELATIONSHIP: "fast",
         }
         
         # Cache untuk model availability check
