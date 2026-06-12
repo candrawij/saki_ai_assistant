@@ -1,0 +1,29 @@
+{
+  "agent_policy": {
+    "READ_ONLY": "auto",
+    "SAFE_WRITE": "auto",
+    "SYSTEM_ACCESS": "confirm",
+    "DANGEROUS": "confirm"
+  },
+  "delegation": {
+    "enabled": true,
+    "allowed_actions": [
+      "chat",
+      "task_query",
+      "project_update"
+    ],
+    "signature": "[Dibalas oleh Saki]",
+    "notify_owner": true
+  },
+  "whitelist": {
+    "users": [],
+    "observers": [
+      "Orang B"
+    ]
+  },
+  "default_permissions": {
+    "new_fact": "AGENT_USE",
+    "new_document": "PRIVATE",
+    "new_reflection": "SHARED"
+  }
+}

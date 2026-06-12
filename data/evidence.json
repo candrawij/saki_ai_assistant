@@ -1,0 +1,70 @@
+{
+  "1": {
+    "fact_id": 1,
+    "observer": "kamu",
+    "perspective": "internal",
+    "source_chat_id": null,
+    "source_type": "manual",
+    "confidence": 0.95,
+    "shareable": false,
+    "agent_usable": true,
+    "created_at": "2026-06-12T15:17:01.019164",
+    "last_validated": "2026-06-12T15:17:01.020168",
+    "validation_count": 2,
+    "expiry": null,
+    "history": [
+      {
+        "action": "created",
+        "timestamp": "2026-06-12T15:17:01.019164",
+        "detail": "Recorded by kamu (internal)"
+      },
+      {
+        "action": "validated",
+        "timestamp": "2026-06-12T15:17:01.020168",
+        "detail": "Confidence: 0.95"
+      }
+    ]
+  },
+  "10": {
+    "fact_id": 10,
+    "observer": "kamu",
+    "perspective": "internal",
+    "source_chat_id": null,
+    "source_type": "manual",
+    "confidence": 1.0,
+    "shareable": true,
+    "agent_usable": true,
+    "created_at": "2026-06-12T15:17:01.027367",
+    "last_validated": "2026-06-12T15:17:01.027367",
+    "validation_count": 1,
+    "expiry": null,
+    "history": [
+      {
+        "action": "created",
+        "timestamp": "2026-06-12T15:17:01.027367",
+        "detail": "Recorded by kamu (internal)"
+      }
+    ]
+  },
+  "11": {
+    "fact_id": 11,
+    "observer": "kamu",
+    "perspective": "internal",
+    "source_chat_id": null,
+    "source_type": "manual",
+    "confidence": 1.0,
+    "shareable": false,
+    "agent_usable": true,
+    "created_at": "2026-06-12T15:17:01.027367",
+    "last_validated": "2026-06-12T15:17:01.027367",
+    "validation_count": 1,
+    "expiry": null,
+    "history": [
+      {
+        "action": "created",
+        "timestamp": "2026-06-12T15:17:01.027367",
+        "detail": "Recorded by kamu (internal)"
+      }
+    ]
+  }
+}

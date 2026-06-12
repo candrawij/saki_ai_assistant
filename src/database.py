@@ -125,10 +125,56 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             dismissed_at TIMESTAMP
         )''')
+
+        # === FASE 2.5: EVIDENCE & PERMISSIONS ===
+        c.execute('''CREATE TABLE IF NOT EXISTS evidence (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fact_id INTEGER NOT NULL,
+            observer TEXT DEFAULT 'user',
+            perspective TEXT DEFAULT 'internal',
+            source_chat_id INTEGER,
+            source_type TEXT DEFAULT 'manual',
+            confidence REAL DEFAULT 1.0,
+            shareable INTEGER DEFAULT 0,
+            agent_usable INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_validated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            validation_count INTEGER DEFAULT 1,
+            expiry TIMESTAMP,
+            FOREIGN KEY (fact_id) REFERENCES facts(id)
+        )''')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS agent_actions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action_type TEXT NOT NULL,
+            action_detail TEXT,
+            agent_name TEXT,
+            user_confirmed INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            executed_at TIMESTAMP
+        )''')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS delegation_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            action TEXT NOT NULL,
+            requester TEXT,
+            context TEXT,
+            response TEXT,
+            signature_used TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''')
         
         # Auto-migration
         c.execute("PRAGMA table_info(facts)")
         columns = [col[1] for col in c.fetchall()]
+
+        if 'observer' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN observer TEXT DEFAULT 'user'")
+        if 'perspective' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN perspective TEXT DEFAULT 'internal'")
+        if 'shareable' not in columns:
+            c.execute("ALTER TABLE facts ADD COLUMN shareable INTEGER DEFAULT 0")
         
         migrations = {
             'source': "TEXT DEFAULT 'manual'",
