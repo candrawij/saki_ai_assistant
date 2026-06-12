@@ -4,6 +4,7 @@ AI Pribadi v8.0 — Proactive Assistant
 """
 import sys
 from pathlib import Path
+import threading
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import streamlit as st
@@ -211,15 +212,38 @@ if st.session_state.authenticated:
                 st.session_state.chat_history.append({"role": "assistant", "content": jawaban})
                 simpan_chat(NAMA_AI.upper(), jawaban)
                 
-                hasil = auto_ekstrak_fakta(prompt, st.session_state.chat_history)
-                if hasil:
-                    existing = cek_fakta_duplikat(hasil["fact"])
-                    if not existing:
-                        importance = auto_rate_importance(hasil["fact"], hasil["category"])
-                        success, error = simpan_fakta(hasil["category"], hasil["fact"], "auto", hasil["confidence"], importance)
-                        if not success:
-                            logger.warning(f"Auto-save failed: {error}")
+                # Auto-extract di BACKGROUND — jangan blocking UI
+                def extract_background(pesan, history):
+                    """Ekstrak fakta di background thread."""
+                    try:
+                        hasil = auto_ekstrak_fakta(pesan, history)
+                        if hasil:
+                            # Cek duplikat dulu
+                            existing = cek_fakta_duplikat(hasil["fact"])
+                            if not existing:
+                                # Auto-rate importance
+                                importance = auto_rate_importance(hasil["fact"], hasil["category"])
+                                
+                                simpan_fakta(
+                                    hasil["category"],
+                                    hasil["fact"],
+                                    source="auto_extract",
+                                    confidence=hasil["confidence"],
+                                    importance=importance
+                                )
+                                logger.info(f"Background extract SAVED: [{hasil['category']}] {hasil['fact']}")
+                            else:
+                                logger.debug(f"Background extract SKIPPED: duplicate of #{existing}")
+                    except Exception as e:
+                        logger.warning(f"Background extract failed: {e}")
 
+                # Jalankan di background — jangan blocking
+                threading.Thread(
+                    target=extract_background,
+                    args=(prompt, st.session_state.chat_history),
+                    daemon=True
+                ).start()
+    
             st.rerun()
     
     # ===== RINGKASAN =====

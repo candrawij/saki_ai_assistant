@@ -127,7 +127,7 @@ class ModelRouter:
         """
         model = self.get_model(task_type)
         
-        logger.info(f"Routing: {task_type.value} → {model}")
+        logger.info(f"Routing: {task_type.value} -> {model}")
         
         start_time = time.time()
         

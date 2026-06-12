@@ -11,6 +11,10 @@ import ollama
 import json
 import re
 import logging
+
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 from typing import Optional, List, Tuple, Dict
 import datetime
 import os
@@ -172,7 +176,8 @@ def chat_saki(pesan: str, riwayat_chat: List[Dict] = None) -> str:
 
 def auto_ekstrak_fakta(pesan_user: str, riwayat_chat: List[Dict] = None) -> Optional[Dict]:
     """Ekstrak fakta penting dari pesan user — pakai Model Router."""
-    if len(pesan_user.split()) < 3:
+    if len(pesan_user.split()) < 5:
+        logger.debug(f"Auto-extract SKIPPED: chat terlalu pendek ({len(pesan_user.split())} kata)")
         return None
     
     konteks = ""
