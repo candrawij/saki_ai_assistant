@@ -4,6 +4,8 @@ Voice input untuk Saki — dengan auto-routing ke Agent
 """
 
 import threading
+
+from streamlit import text
 from plugins.base import BasePlugin, PluginStatus
 
 
@@ -80,11 +82,7 @@ class Plugin(BasePlugin):
             
             with mic as source:
                 # Adjust noise
-                yield "🎤 Menyesuaikan dengan suara sekitar..."
-                self.recognizer.adjust_for_ambient_noise(source, duration=1)
-                
-                # Listen
-                yield "🎤 **Mendengarkan...** _(bicara sekarang, max 10 detik)_"
+                self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
                 
                 try:
                     audio = self.recognizer.listen(source, timeout=5, phrase_time_limit=10)
@@ -108,23 +106,37 @@ class Plugin(BasePlugin):
     
     def _route_to_agent(self, text: str) -> str:
         """
-        Auto-route hasil speech ke Agent yang sesuai.
-        Kalau bukan perintah agent, kirim sebagai chat biasa.
+        Auto-route hasil speech ke Agent atau Special Command.
         """
         try:
             from src.agents.router import AgentRouter
             router = AgentRouter()
-            agent, routed_message = router.route(text)
             
-            if agent == "special":
+            msg_lower = text.lower().strip()
+            
+            # ✅ Cek SPECIAL dulu (sebelum agent)
+            special_keywords = [
+                "screenshot", "tangkapan layar", "ss",
+                "info sistem", "sistem info", "system info", "info komputer",
+                "buka aplikasi", "open app",
+                "cmd:", "run:",
+            ]
+            if any(kw in msg_lower for kw in special_keywords):
                 return f"🤖 **Special**\n\n{router.execute_special(text)}"
             
+            # ✅ Cek Agent
+            agent, routed_message = router.route(text)
             if agent is not None:
                 result = agent.execute(text)
                 return f"🤖 **{agent.name}**\n\n{result}"
             
-            # Bukan perintah agent — beri tahu user
-            return f"💬 \"{text}\"\n\n✅ Suara terdengar! Kirim sebagai chat untuk diproses AI."
+            # ✅ Bukan perintah — kirim sebagai chat ke AI
+            try:
+                from src.ai import chat_saki
+                response = chat_saki(text, [])
+                return f"💬 _{text}_\n\n{response}"
+            except Exception as e:
+                return f"💬 \"{text}\"\n\n Chat error: {str(e)}"
         
         except Exception as e:
             return f"⚠️ Gagal routing: {str(e)}"

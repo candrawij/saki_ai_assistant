@@ -223,6 +223,14 @@ if st.session_state.authenticated:
                 prompt = "dengarkan suara"
 
         if prompt:
+            # Tentukan status spinner berdasarkan prompt
+            is_voice = "dengarkan suara" in prompt.lower()
+            
+            if is_voice:
+                spinner_text = "🎤 Mendengarkan... (bicara sekarang)"
+            else:
+                spinner_text = "Berpikir..."
+            
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             simpan_chat("USER", prompt)
             
@@ -230,9 +238,12 @@ if st.session_state.authenticated:
             task_keywords = ["tugas", "deadline", "belum selesai", "masih aktif", "apa saja", "yang belum"]
             is_task_query = any(kw in prompt.lower() for kw in task_keywords)
 
-            with st.spinner("Berpikir..."):
+            with st.spinner(spinner_text):
                 if is_task_query:
                     jawaban = answer_task_query()
+                elif is_voice:
+                    # Voice input — langsung kasih ke chat_saki
+                    jawaban = chat_saki(prompt, st.session_state.chat_history)
                 else:
                     jawaban = chat_saki(prompt, st.session_state.chat_history)
 
