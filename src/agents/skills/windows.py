@@ -16,7 +16,7 @@ from typing import Dict
 def screenshot(save_folder: str = None) -> str:
     """Tangkap layar dan simpan."""
     if save_folder is None:
-        save_folder = "E:\\Priv Bot\\data\\screenshots"
+        save_folder = "E:\\PrivBot\\data\\screenshots"
     
     os.makedirs(save_folder, exist_ok=True)
     
