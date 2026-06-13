@@ -554,21 +554,25 @@ if st.session_state.authenticated:
                 st.info(f"Ditemukan {len(duplikat)} potensi duplikat:")
                 for i, d in enumerate(duplikat):
                     with st.container():
-                        st.warning(f"**#{d['id1']}** ↔ **#{d['id2']}**")
+                        # Handle dua format: {id1, id2} atau {source_id, target_id}
+                        id1 = d.get('id1') or d.get('source_id', '?')
+                        id2 = d.get('id2') or d.get('target_id', '?')
+
+                        st.warning(f"**#{id1}** ↔ **#{id2}**")
                         st.write(f"Alasan: {d.get('reason', 'Tidak ada alasan')}")
                         st.write(f"Saran: {d.get('suggestion', 'Merge jika sama')}")
-                        with st.form(key=f"merge_form_{d['id1']}_{d['id2']}_{i}"):
-                            submitted = st.form_submit_button(f"🔗 Merge #{d['id1']} + #{d['id2']}", use_container_width=True)
+                        with st.form(key=f"merge_form_{id1}_{id2}_{i}"):
+                            submitted = st.form_submit_button(f"🔗 Merge #{id1} + #{id2}", use_container_width=True)
                             if submitted:
-                                logger.info(f"User clicked merge: {d['id1']} + {d['id2']}")
-                                f1 = lihat_fakta_by_id(d['id1'])
-                                f2 = lihat_fakta_by_id(d['id2'])
+                                logger.info(f"User clicked merge: {id1} + {id2}")
+                                f1 = lihat_fakta_by_id(id1)
+                                f2 = lihat_fakta_by_id(id2)
                                 if not f1:
-                                    st.session_state.merge_message = f"❌ Fakta #{d['id1']} tidak ditemukan."
-                                    logger.error(f"Merge failed: fact {d['id1']} not found")
+                                    st.session_state.merge_message = f"❌ Fakta #{id1} tidak ditemukan."
+                                    logger.error(f"Merge failed: fact {id1} not found")
                                 elif not f2:
-                                    st.session_state.merge_message = f"❌ Fakta #{d['id2']} tidak ditemukan."
-                                    logger.error(f"Merge failed: fact {d['id2']} not found")
+                                    st.session_state.merge_message = f"❌ Fakta #{id2} tidak ditemukan."
+                                    logger.error(f"Merge failed: fact {id2} not found")
                                 else:
                                     logger.info(f"Merging: [{f1[1]}] {f1[2][:50]} + [{f2[1]}] {f2[2][:50]}")
                                     hasil = merge_fakta_dengan_ai([f1, f2])
@@ -583,14 +587,17 @@ if st.session_state.authenticated:
                                         logger.info(f"Saving merged fact: [{kategori}] {hasil[:50]}... (imp={new_importance})")
                                         success, error = simpan_fakta(kategori, hasil, "manual", 1.0, new_importance)
                                         if success:
-                                            hapus_fakta(d['id1'])
-                                            hapus_fakta(d['id2'])
-                                            logger.info(f"Merge complete: {d['id1']} + {d['id2']} -> new fact saved")
-                                            st.session_state.merge_message = f"✅ Berhasil merge! Fakta #{d['id1']} + #{d['id2']} digabung."
+                                            hapus_fakta(id1)
+                                            hapus_fakta(id2)
+                                            logger.info(f"Merge complete: {id1} + {id2} -> new fact saved")
+                                            st.session_state.merge_message = f"✅ Berhasil merge! Fakta #{id1} + #{id2} digabung."
                                             # Hapus hanya pasangan ini dari daftar duplikat
                                             st.session_state.duplicate_results = [
                                                 dup for dup in st.session_state.duplicate_results
-                                                if not (dup['id1'] == d['id1'] and dup['id2'] == d['id2'])
+                                                if not (
+                                                    (dup.get('id1') == id1 or dup.get('source_id') == id1) and 
+                                                    (dup.get('id2') == id2 or dup.get('target_id') == id2)
+                                                )
                                             ]
                                         else:
                                             logger.error(f"Merge save failed: {error}")
@@ -626,28 +633,54 @@ if st.session_state.authenticated:
         for f in sorted_facts[:30]:
             importance_bar = "█" * f[5] + "░" * (10 - f[5])
             
-            with st.expander(f"⭐ {f[5]}/10 | [#{f[0]}] [{f[1]}] {f[2][:80]}..."):
-                st.write(f"**Konten:** {f[2]}")
-                st.write(f"**Kategori:** {f[1]}")
-                st.write(f"**Importance:** {importance_bar} ({f[5]}/10)")
-                st.write(f"**Diakses:** {f[6]} kali")
-                st.write(f"**Terakhir diakses:** {f[7] if f[7] else 'Belum pernah'}")
-                st.write(f"**Dibuat:** {f[8]}")
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    new_score = st.slider("Importance", 1, 10, f[5], key=f"imp_{f[0]}")
-                    if new_score != f[5]:
-                        if st.button(f"Update #{f[0]}", key=f"upd_{f[0]}"):
-                            update_importance(f[0], new_score)
+            # ✅ Cek apakah dalam mode edit
+            if st.session_state.get(f"edit_intel_{f[0]}", False):
+                # Tampilkan form edit DI LUAR expander
+                with st.container():
+                    st.write(f"✏️ **Edit Fakta #{f[0]}**")
+                    baru = st.text_area("Konten:", value=f[2], key=f"input_intel_{f[0]}")
+                    col_save, col_cancel = st.columns(2)
+                    with col_save:
+                        if st.button("💾 Simpan", key=f"save_intel_{f[0]}"):
+                            edit_fakta(f[0], baru)
+                            try:
+                                with get_db() as conn:
+                                    c = conn.cursor()
+                                    c.execute("UPDATE facts SET source = 'manual', confidence = 1.0 WHERE id = ?", (f[0],))
+                                    conn.commit()
+                            except Exception as e:
+                                logger.error(f"Failed to update metadata: {str(e)}")
+                            st.session_state[f"edit_intel_{f[0]}"] = False
                             st.rerun()
-                with col2:
-                    if st.button(f"✏️ Edit #{f[0]}", key=f"edit_intel_{f[0]}"):
-                        st.session_state[f"edit_intel_{f[0]}"] = True
-                with col3:
-                    if st.button(f"🗑️ Hapus #{f[0]}", key=f"hapus_intel_{f[0]}"):
-                        hapus_fakta(f[0])
-                        st.rerun()
+                    with col_cancel:
+                        if st.button("❌ Batal", key=f"cancel_intel_{f[0]}"):
+                            st.session_state[f"edit_intel_{f[0]}"] = False
+                            st.rerun()
+            else:
+                # Tampilan normal dalam expander
+                with st.expander(f"⭐ {f[5]}/10 | [#{f[0]}] [{f[1]}] {f[2][:80]}..."):
+                    st.write(f"**Konten:** {f[2]}")
+                    st.write(f"**Kategori:** {f[1]}")
+                    st.write(f"**Importance:** {importance_bar} ({f[5]}/10)")
+                    st.write(f"**Diakses:** {f[6]} kali")
+                    st.write(f"**Terakhir diakses:** {f[7] if f[7] else 'Belum pernah'}")
+                    st.write(f"**Dibuat:** {f[8]}")
+                    
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        new_score = st.slider("Importance", 1, 10, f[5], key=f"imp_{f[0]}")
+                        if new_score != f[5]:
+                            if st.button(f"Update #{f[0]}", key=f"upd_{f[0]}"):
+                                update_importance(f[0], new_score)
+                                st.rerun()
+                    with col2:
+                        if st.button(f"✏️ Edit #{f[0]}", key=f"edit_btn_{f[0]}"):
+                            st.session_state[f"edit_intel_{f[0]}"] = True
+                            st.rerun()
+                    with col3:
+                        if st.button(f"🗑️ Hapus #{f[0]}", key=f"hapus_intel_{f[0]}"):
+                            hapus_fakta(f[0])
+                            st.rerun()
                 
                 if st.session_state.get(f"edit_intel_{f[0]}"):
                     baru = st.text_area("Edit:", value=f[2], key=f"input_intel_{f[0]}")
